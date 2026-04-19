@@ -1,0 +1,308 @@
+﻿namespace PosyanduProject
+{
+    partial class FormBalita
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.label1 = new System.Windows.Forms.Label();
+            this.txtIdBalita = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.txtNik = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.txtNamaBalita = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.dtpLahir = new System.Windows.Forms.DateTimePicker();
+            this.label5 = new System.Windows.Forms.Label();
+            this.cmbJenisKelamin = new System.Windows.Forms.ComboBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.btnTambah = new System.Windows.Forms.Button();
+            this.btnUpdate = new System.Windows.Forms.Button();
+            this.btnHapus = new System.Windows.Forms.Button();
+            this.btnBersih = new System.Windows.Forms.Button();
+            this.txtCari = new System.Windows.Forms.TextBox();
+            this.btnCari = new System.Windows.Forms.Button();
+            this.btnTampilkan = new System.Windows.Forms.Button();
+            this.dgvBalita = new System.Windows.Forms.DataGridView();
+            this.cmbOrangTua = new System.Windows.Forms.ComboBox();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvBalita)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(28, 9);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(57, 16);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "ID Balita";
+            // 
+            // txtIdBalita
+            // 
+            this.txtIdBalita.Location = new System.Drawing.Point(28, 28);
+            this.txtIdBalita.Name = "txtIdBalita";
+            this.txtIdBalita.Size = new System.Drawing.Size(57, 22);
+            this.txtIdBalita.TabIndex = 1;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(28, 67);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(28, 16);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "NIK";
+            // 
+            // txtNik
+            // 
+            this.txtNik.Location = new System.Drawing.Point(31, 86);
+            this.txtNik.MaxLength = 16;
+            this.txtNik.Name = "txtNik";
+            this.txtNik.Size = new System.Drawing.Size(144, 22);
+            this.txtNik.TabIndex = 3;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(25, 124);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(81, 16);
+            this.label3.TabIndex = 4;
+            this.label3.Text = "Nama Balita";
+            // 
+            // txtNamaBalita
+            // 
+            this.txtNamaBalita.Location = new System.Drawing.Point(28, 143);
+            this.txtNamaBalita.Name = "txtNamaBalita";
+            this.txtNamaBalita.Size = new System.Drawing.Size(147, 22);
+            this.txtNamaBalita.TabIndex = 5;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(25, 182);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(90, 16);
+            this.label4.TabIndex = 6;
+            this.label4.Text = "Tanggal Lahir";
+            // 
+            // dtpLahir
+            // 
+            this.dtpLahir.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpLahir.Location = new System.Drawing.Point(28, 201);
+            this.dtpLahir.Name = "dtpLahir";
+            this.dtpLahir.Size = new System.Drawing.Size(147, 22);
+            this.dtpLahir.TabIndex = 7;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(25, 238);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(90, 16);
+            this.label5.TabIndex = 8;
+            this.label5.Text = "Jenis Kelamin";
+            // 
+            // cmbJenisKelamin
+            // 
+            this.cmbJenisKelamin.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbJenisKelamin.FormattingEnabled = true;
+            this.cmbJenisKelamin.Location = new System.Drawing.Point(28, 257);
+            this.cmbJenisKelamin.Name = "cmbJenisKelamin";
+            this.cmbJenisKelamin.Size = new System.Drawing.Size(147, 24);
+            this.cmbJenisKelamin.TabIndex = 9;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(25, 297);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(111, 16);
+            this.label6.TabIndex = 10;
+            this.label6.Text = "Nama Orang Tua";
+            // 
+            // btnTambah
+            // 
+            this.btnTambah.BackColor = System.Drawing.Color.Green;
+            this.btnTambah.ForeColor = System.Drawing.Color.White;
+            this.btnTambah.Location = new System.Drawing.Point(28, 356);
+            this.btnTambah.Name = "btnTambah";
+            this.btnTambah.Size = new System.Drawing.Size(75, 38);
+            this.btnTambah.TabIndex = 12;
+            this.btnTambah.Text = "Tambah";
+            this.btnTambah.UseVisualStyleBackColor = false;
+            this.btnTambah.Click += new System.EventHandler(this.btnTambah_Click);
+            // 
+            // btnUpdate
+            // 
+            this.btnUpdate.BackColor = System.Drawing.Color.Blue;
+            this.btnUpdate.ForeColor = System.Drawing.Color.White;
+            this.btnUpdate.Location = new System.Drawing.Point(153, 356);
+            this.btnUpdate.Name = "btnUpdate";
+            this.btnUpdate.Size = new System.Drawing.Size(75, 38);
+            this.btnUpdate.TabIndex = 13;
+            this.btnUpdate.Text = "Update";
+            this.btnUpdate.UseVisualStyleBackColor = false;
+            this.btnUpdate.Click += new System.EventHandler(this.btnUpdate_Click);
+            // 
+            // btnHapus
+            // 
+            this.btnHapus.BackColor = System.Drawing.Color.Red;
+            this.btnHapus.ForeColor = System.Drawing.Color.White;
+            this.btnHapus.Location = new System.Drawing.Point(28, 400);
+            this.btnHapus.Name = "btnHapus";
+            this.btnHapus.Size = new System.Drawing.Size(75, 38);
+            this.btnHapus.TabIndex = 14;
+            this.btnHapus.Text = "Hapus";
+            this.btnHapus.UseVisualStyleBackColor = false;
+            this.btnHapus.Click += new System.EventHandler(this.btnHapus_Click);
+            // 
+            // btnBersih
+            // 
+            this.btnBersih.BackColor = System.Drawing.SystemColors.AppWorkspace;
+            this.btnBersih.ForeColor = System.Drawing.Color.White;
+            this.btnBersih.Location = new System.Drawing.Point(153, 400);
+            this.btnBersih.Name = "btnBersih";
+            this.btnBersih.Size = new System.Drawing.Size(75, 38);
+            this.btnBersih.TabIndex = 15;
+            this.btnBersih.Text = "Bersih";
+            this.btnBersih.UseVisualStyleBackColor = false;
+            this.btnBersih.Click += new System.EventHandler(this.btnBersih_Click);
+            // 
+            // txtCari
+            // 
+            this.txtCari.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtCari.Location = new System.Drawing.Point(342, 28);
+            this.txtCari.Name = "txtCari";
+            this.txtCari.Size = new System.Drawing.Size(216, 22);
+            this.txtCari.TabIndex = 16;
+            this.txtCari.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtCari_KeyDown);
+            // 
+            // btnCari
+            // 
+            this.btnCari.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnCari.Location = new System.Drawing.Point(564, 28);
+            this.btnCari.Name = "btnCari";
+            this.btnCari.Size = new System.Drawing.Size(75, 22);
+            this.btnCari.TabIndex = 17;
+            this.btnCari.Text = "Cari";
+            this.btnCari.UseVisualStyleBackColor = true;
+            this.btnCari.Click += new System.EventHandler(this.btnCari_Click);
+            // 
+            // btnTampilkan
+            // 
+            this.btnTampilkan.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnTampilkan.Location = new System.Drawing.Point(645, 26);
+            this.btnTampilkan.Name = "btnTampilkan";
+            this.btnTampilkan.Size = new System.Drawing.Size(114, 23);
+            this.btnTampilkan.TabIndex = 18;
+            this.btnTampilkan.Text = "Tampilkan Data";
+            this.btnTampilkan.UseVisualStyleBackColor = true;
+            this.btnTampilkan.Click += new System.EventHandler(this.btnTampilkan_Click);
+            // 
+            // dgvBalita
+            // 
+            this.dgvBalita.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dgvBalita.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvBalita.BackgroundColor = System.Drawing.Color.White;
+            this.dgvBalita.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvBalita.Location = new System.Drawing.Point(342, 73);
+            this.dgvBalita.Name = "dgvBalita";
+            this.dgvBalita.RowHeadersWidth = 51;
+            this.dgvBalita.RowTemplate.Height = 24;
+            this.dgvBalita.Size = new System.Drawing.Size(417, 365);
+            this.dgvBalita.TabIndex = 19;
+            this.dgvBalita.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvBalita_CellClick);
+            // 
+            // cmbOrangTua
+            // 
+            this.cmbOrangTua.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbOrangTua.FormattingEnabled = true;
+            this.cmbOrangTua.Location = new System.Drawing.Point(28, 316);
+            this.cmbOrangTua.Name = "cmbOrangTua";
+            this.cmbOrangTua.Size = new System.Drawing.Size(144, 24);
+            this.cmbOrangTua.TabIndex = 20;
+            // 
+            // FormBalita
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.cmbOrangTua);
+            this.Controls.Add(this.dgvBalita);
+            this.Controls.Add(this.btnTampilkan);
+            this.Controls.Add(this.btnCari);
+            this.Controls.Add(this.txtCari);
+            this.Controls.Add(this.btnBersih);
+            this.Controls.Add(this.btnHapus);
+            this.Controls.Add(this.btnUpdate);
+            this.Controls.Add(this.btnTambah);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.cmbJenisKelamin);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.dtpLahir);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.txtNamaBalita);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.txtNik);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.txtIdBalita);
+            this.Controls.Add(this.label1);
+            this.Name = "FormBalita";
+            this.Text = "FormBalita";
+            this.Load += new System.EventHandler(this.FormBalita_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvBalita)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox txtIdBalita;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox txtNik;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox txtNamaBalita;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.DateTimePicker dtpLahir;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ComboBox cmbJenisKelamin;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button btnTambah;
+        private System.Windows.Forms.Button btnUpdate;
+        private System.Windows.Forms.Button btnHapus;
+        private System.Windows.Forms.Button btnBersih;
+        private System.Windows.Forms.TextBox txtCari;
+        private System.Windows.Forms.Button btnCari;
+        private System.Windows.Forms.Button btnTampilkan;
+        private System.Windows.Forms.DataGridView dgvBalita;
+        private System.Windows.Forms.ComboBox cmbOrangTua;
+    }
+}
