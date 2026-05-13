@@ -12,6 +12,15 @@ namespace PosyanduProject
             InitializeComponent();
         }
 
+        private void FormLogin_Load(object sender, EventArgs e)
+        {
+            // [REVISI UX] Memastikan ketikan di kolom password disamarkan di awal
+            if (txtPassword != null)
+            {
+                txtPassword.UseSystemPasswordChar = true;
+            }
+        }
+
         private void btnLogin_Click(object sender, EventArgs e)
         {
             lblError.Text = "";
@@ -24,6 +33,7 @@ namespace PosyanduProject
 
             try
             {
+                // Menggunakan parameterized query untuk mencegah SQL Injection
                 string sql = @"SELECT id_user, nama_lengkap, username, role 
                                FROM Users 
                                WHERE username = @uname AND password = @pwd";
@@ -37,6 +47,7 @@ namespace PosyanduProject
                 {
                     DataRow row = dt.Rows[0];
 
+                    // Menyimpan data ke SessionManager
                     SessionManager.IdUser = Convert.ToInt32(row["id_user"]);
                     SessionManager.NamaLengkap = row["nama_lengkap"].ToString();
                     SessionManager.Username = row["username"].ToString();
@@ -61,11 +72,49 @@ namespace PosyanduProject
             }
         }
 
+        // Fungsi agar bisa tekan ENTER saat berada di kolom Password
+        private void txtPassword_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true; // Menghilangkan bunyi "ding" pada Windows
+                btnLogin_Click(sender, e); // Memanggil tombol login
+            }
+        }
+
+        // Fungsi agar bisa tekan ENTER saat berada di kolom Username
+        private void txtUsername_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true;
+                txtPassword.Focus(); // Pindah ke kolom password jika tekan enter di username
+            }
+        }
+
+        // [FITUR BARU] Event ketika CheckBox Show Password di klik/berubah
+        private void chkShowPassword_CheckedChanged(object sender, EventArgs e)
+        {
+            if (txtPassword != null)
+            {
+                if (chkShowPassword.Checked)
+                {
+                    // Tampilkan tulisan asli (buka topeng sistem & topeng cadangan)
+                    txtPassword.UseSystemPasswordChar = false;
+                    txtPassword.PasswordChar = '\0'; // \0 artinya karakter kosong/dihapus
+                }
+                else
+                {
+                    // Samarkan kembali
+                    txtPassword.UseSystemPasswordChar = true;
+                }
+            }
+        }
+
         private void linkDaftar_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             FormRegister frmReg = new FormRegister();
             frmReg.ShowDialog();
         }
-
     }
 }
