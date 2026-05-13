@@ -28,8 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
-            this.txtIdVaksin = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.txtNamaVaksin = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -46,25 +44,10 @@
             this.btnCari = new System.Windows.Forms.Button();
             this.btnTampilkan = new System.Windows.Forms.Button();
             this.dgvVaksin = new System.Windows.Forms.DataGridView();
+            this.txtIdVaksin = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvVaksin)).BeginInit();
             this.SuspendLayout();
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(66, 67);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(64, 16);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "ID Vaksin";
-            // 
-            // txtIdVaksin
-            // 
-            this.txtIdVaksin.Location = new System.Drawing.Point(66, 86);
-            this.txtIdVaksin.Name = "txtIdVaksin";
-            this.txtIdVaksin.ReadOnly = true;
-            this.txtIdVaksin.Size = new System.Drawing.Size(100, 22);
-            this.txtIdVaksin.TabIndex = 1;
             // 
             // label2
             // 
@@ -81,6 +64,7 @@
             this.txtNamaVaksin.Name = "txtNamaVaksin";
             this.txtNamaVaksin.Size = new System.Drawing.Size(173, 22);
             this.txtNamaVaksin.TabIndex = 3;
+            this.txtNamaVaksin.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtNamaVaksin_KeyPress);
             // 
             // label3
             // 
@@ -97,6 +81,7 @@
             this.txtStok.Name = "txtStok";
             this.txtStok.Size = new System.Drawing.Size(173, 22);
             this.txtStok.TabIndex = 5;
+            this.txtStok.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtStok_KeyPress);
             // 
             // label4
             // 
@@ -228,6 +213,25 @@
             this.dgvVaksin.TabIndex = 17;
             this.dgvVaksin.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvVaksin_CellClick);
             // 
+            // txtIdVaksin
+            // 
+            this.txtIdVaksin.Location = new System.Drawing.Point(66, 86);
+            this.txtIdVaksin.Name = "txtIdVaksin";
+            this.txtIdVaksin.ReadOnly = true;
+            this.txtIdVaksin.Size = new System.Drawing.Size(100, 22);
+            this.txtIdVaksin.TabIndex = 1;
+            this.txtIdVaksin.Visible = false;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(66, 67);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(64, 16);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "ID Vaksin";
+            this.label1.Visible = false;
+            // 
             // FormVaksin
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -254,6 +258,7 @@
             this.Name = "FormVaksin";
             this.Text = "FormVaksin";
             this.Load += new System.EventHandler(this.FormVaksin_Load);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtStok_KeyPress);
             ((System.ComponentModel.ISupportInitialize)(this.dgvVaksin)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -261,9 +266,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox txtIdVaksin;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox txtNamaVaksin;
         private System.Windows.Forms.Label label3;
@@ -280,5 +282,7 @@
         private System.Windows.Forms.Button btnCari;
         private System.Windows.Forms.Button btnTampilkan;
         private System.Windows.Forms.DataGridView dgvVaksin;
+        private System.Windows.Forms.TextBox txtIdVaksin;
+        private System.Windows.Forms.Label label1;
     }
 }
