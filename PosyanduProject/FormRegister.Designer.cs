@@ -39,6 +39,7 @@
             this.txtKonfirmasi = new System.Windows.Forms.TextBox();
             this.btnDaftar = new System.Windows.Forms.Button();
             this.btnBatal = new System.Windows.Forms.Button();
+            this.chkShowPassword = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // label1
@@ -66,6 +67,7 @@
             this.txtNama.Name = "txtNama";
             this.txtNama.Size = new System.Drawing.Size(100, 22);
             this.txtNama.TabIndex = 2;
+            this.txtNama.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtNama_KeyDown);
             // 
             // txtUsername
             // 
@@ -73,6 +75,7 @@
             this.txtUsername.Name = "txtUsername";
             this.txtUsername.Size = new System.Drawing.Size(100, 22);
             this.txtUsername.TabIndex = 3;
+            this.txtUsername.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtUsername_KeyDown);
             // 
             // label3
             // 
@@ -99,6 +102,7 @@
             this.txtPassword.PasswordChar = '*';
             this.txtPassword.Size = new System.Drawing.Size(100, 22);
             this.txtPassword.TabIndex = 6;
+            this.txtPassword.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtPassword_KeyDown);
             // 
             // label5
             // 
@@ -116,6 +120,7 @@
             this.txtKonfirmasi.PasswordChar = '*';
             this.txtKonfirmasi.Size = new System.Drawing.Size(100, 22);
             this.txtKonfirmasi.TabIndex = 8;
+            this.txtKonfirmasi.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtKonfirmasi_KeyDown);
             // 
             // btnDaftar
             // 
@@ -141,11 +146,23 @@
             this.btnBatal.UseVisualStyleBackColor = false;
             this.btnBatal.Click += new System.EventHandler(this.btnBatal_Click);
             // 
+            // chkShowPassword
+            // 
+            this.chkShowPassword.AutoSize = true;
+            this.chkShowPassword.Location = new System.Drawing.Point(401, 267);
+            this.chkShowPassword.Name = "chkShowPassword";
+            this.chkShowPassword.Size = new System.Drawing.Size(156, 20);
+            this.chkShowPassword.TabIndex = 11;
+            this.chkShowPassword.Text = "Tampilkan Password";
+            this.chkShowPassword.UseVisualStyleBackColor = true;
+            this.chkShowPassword.CheckedChanged += new System.EventHandler(this.chkShowPassword_CheckedChanged);
+            // 
             // FormRegister
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.chkShowPassword);
             this.Controls.Add(this.btnBatal);
             this.Controls.Add(this.btnDaftar);
             this.Controls.Add(this.txtKonfirmasi);
@@ -159,6 +176,7 @@
             this.Controls.Add(this.label1);
             this.Name = "FormRegister";
             this.Text = "FormRegister";
+            this.Load += new System.EventHandler(this.FormRegister_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -177,5 +195,6 @@
         private System.Windows.Forms.TextBox txtKonfirmasi;
         private System.Windows.Forms.Button btnDaftar;
         private System.Windows.Forms.Button btnBatal;
+        private System.Windows.Forms.CheckBox chkShowPassword;
     }
 }
