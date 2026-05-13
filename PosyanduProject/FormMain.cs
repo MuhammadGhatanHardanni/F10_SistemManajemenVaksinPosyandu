@@ -15,35 +15,51 @@ namespace PosyanduProject
 
         private void SetupSidebarMenu()
         {
+            // 1. Sembunyikan semua tombol menu terlebih dahulu (Reset State)
             btnMenuVaksin.Visible = false;
             btnMenuBalita.Visible = false;
             btnMenuJadwal.Visible = false;
             btnMenuLaporan.Visible = false;
             btnMenuImunisasi.Visible = false;
 
-            if (SessionManager.IsAdmin)
+            // Pastikan Anda sudah membuat tombol ini di Designer atau Designer.cs
+            if (btnMenuPertumbuhan != null) btnMenuPertumbuhan.Visible = false;
+
+            // 2. Tampilkan menu berdasarkan Role pengguna
+            string role = SessionManager.Role;
+
+            if (role == "Bidan")
             {
                 btnMenuVaksin.Visible = true;
                 btnMenuBalita.Visible = true;
                 btnMenuJadwal.Visible = true;
                 btnMenuLaporan.Visible = true;
+                if (btnMenuPertumbuhan != null) btnMenuPertumbuhan.Visible = true;
+
+                btnMenuLaporan.Text = "Laporan Lengkap";
             }
-            else if (SessionManager.IsPetugas)
+            else if (role == "Petugas")
             {
                 btnMenuBalita.Visible = true;
                 btnMenuJadwal.Visible = true;
                 btnMenuImunisasi.Visible = true;
+                if (btnMenuPertumbuhan != null) btnMenuPertumbuhan.Visible = true;
             }
-            else
+            else if (role == "OrangTua")
             {
                 btnMenuJadwal.Visible = true;
+                if (btnMenuPertumbuhan != null) btnMenuPertumbuhan.Visible = true;
                 btnMenuLaporan.Visible = true;
+
+                // Mengubah teks agar lebih ramah untuk orang tua
                 btnMenuLaporan.Text = "Riwayat Imunisasi";
+                if (btnMenuPertumbuhan != null) btnMenuPertumbuhan.Text = "Riwayat Timbang";
             }
         }
 
         private void OpenForm(Form childForm)
         {
+            // Menutup form yang sedang aktif jika ada
             if (activeForm != null)
             {
                 activeForm.Close();
@@ -55,8 +71,10 @@ namespace PosyanduProject
             childForm.FormBorderStyle = FormBorderStyle.None;
             childForm.Dock = DockStyle.Fill;
 
+            // pnlContent adalah panel utama di tengah FormMain
             pnlContent.Controls.Clear();
             pnlContent.Controls.Add(childForm);
+            pnlContent.Tag = childForm;
             childForm.Show();
         }
 
@@ -80,6 +98,12 @@ namespace PosyanduProject
             OpenForm(new FormImunisasi());
         }
 
+        private void btnMenuPertumbuhan_Click(object sender, EventArgs e)
+        {
+            // Membuka form baru yang tadi kita buat
+            OpenForm(new FormPertumbuhan());
+        }
+
         private void btnMenuLaporan_Click(object sender, EventArgs e)
         {
             OpenForm(new FormLaporan());
@@ -87,8 +111,12 @@ namespace PosyanduProject
 
         private void btnLogout_Click(object sender, EventArgs e)
         {
-            SessionManager.Clear();
-            this.Close(); 
+            if (MessageBox.Show("Apakah Anda yakin ingin keluar?", "Konfirmasi",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                SessionManager.Clear();
+                this.Close(); // Menutup FormMain dan kembali ke FormLogin (tergantung logika Program.cs)
+            }
         }
     }
 }

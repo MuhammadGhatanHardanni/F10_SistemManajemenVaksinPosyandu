@@ -30,14 +30,15 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.pnlSidebar = new System.Windows.Forms.Panel();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.btnLogout = new System.Windows.Forms.Button();
+            this.btnMenuLaporan = new System.Windows.Forms.Button();
+            this.btnMenuPertumbuhan = new System.Windows.Forms.Button(); // Tambahan baru
             this.btnMenuVaksin = new System.Windows.Forms.Button();
             this.btnMenuBalita = new System.Windows.Forms.Button();
             this.btnMenuJadwal = new System.Windows.Forms.Button();
             this.btnMenuImunisasi = new System.Windows.Forms.Button();
-            this.btnMenuLaporan = new System.Windows.Forms.Button();
             this.pnlContent = new System.Windows.Forms.Panel();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.pnlSidebar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -47,11 +48,12 @@
             this.pnlSidebar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(55)))), ((int)(((byte)(65)))));
             this.pnlSidebar.Controls.Add(this.pictureBox1);
             this.pnlSidebar.Controls.Add(this.btnLogout);
-            this.pnlSidebar.Controls.Add(this.btnMenuVaksin);
-            this.pnlSidebar.Controls.Add(this.btnMenuBalita);
-            this.pnlSidebar.Controls.Add(this.btnMenuJadwal);
-            this.pnlSidebar.Controls.Add(this.btnMenuImunisasi);
             this.pnlSidebar.Controls.Add(this.btnMenuLaporan);
+            this.pnlSidebar.Controls.Add(this.btnMenuPertumbuhan); // Menambahkan ke sidebar
+            this.pnlSidebar.Controls.Add(this.btnMenuImunisasi);
+            this.pnlSidebar.Controls.Add(this.btnMenuJadwal);
+            this.pnlSidebar.Controls.Add(this.btnMenuBalita);
+            this.pnlSidebar.Controls.Add(this.btnMenuVaksin);
             this.pnlSidebar.Dock = System.Windows.Forms.DockStyle.Left;
             this.pnlSidebar.Location = new System.Drawing.Point(0, 0);
             this.pnlSidebar.Name = "pnlSidebar";
@@ -64,7 +66,7 @@
             this.btnLogout.FlatAppearance.BorderSize = 0;
             this.btnLogout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLogout.ForeColor = System.Drawing.Color.White;
-            this.btnLogout.Location = new System.Drawing.Point(0, 220);
+            this.btnLogout.Location = new System.Drawing.Point(0, 264);
             this.btnLogout.Name = "btnLogout";
             this.btnLogout.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
             this.btnLogout.Size = new System.Drawing.Size(200, 44);
@@ -74,37 +76,53 @@
             this.btnLogout.UseVisualStyleBackColor = true;
             this.btnLogout.Click += new System.EventHandler(this.btnLogout_Click);
             // 
-            // btnMenuVaksin
+            // btnMenuLaporan
             // 
-            this.btnMenuVaksin.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnMenuVaksin.FlatAppearance.BorderSize = 0;
-            this.btnMenuVaksin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnMenuVaksin.ForeColor = System.Drawing.Color.White;
-            this.btnMenuVaksin.Location = new System.Drawing.Point(0, 176);
-            this.btnMenuVaksin.Name = "btnMenuVaksin";
-            this.btnMenuVaksin.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
-            this.btnMenuVaksin.Size = new System.Drawing.Size(200, 44);
-            this.btnMenuVaksin.TabIndex = 4;
-            this.btnMenuVaksin.Text = "Kelola Vaksin";
-            this.btnMenuVaksin.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnMenuVaksin.UseVisualStyleBackColor = true;
-            this.btnMenuVaksin.Click += new System.EventHandler(this.btnMenuVaksin_Click);
+            this.btnMenuLaporan.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnMenuLaporan.FlatAppearance.BorderSize = 0;
+            this.btnMenuLaporan.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMenuLaporan.ForeColor = System.Drawing.Color.White;
+            this.btnMenuLaporan.Location = new System.Drawing.Point(0, 220);
+            this.btnMenuLaporan.Name = "btnMenuLaporan";
+            this.btnMenuLaporan.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
+            this.btnMenuLaporan.Size = new System.Drawing.Size(200, 44);
+            this.btnMenuLaporan.TabIndex = 0;
+            this.btnMenuLaporan.Text = "Laporan";
+            this.btnMenuLaporan.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnMenuLaporan.UseVisualStyleBackColor = true;
+            this.btnMenuLaporan.Click += new System.EventHandler(this.btnMenuLaporan_Click);
             // 
-            // btnMenuBalita
+            // btnMenuPertumbuhan
             // 
-            this.btnMenuBalita.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnMenuBalita.FlatAppearance.BorderSize = 0;
-            this.btnMenuBalita.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnMenuBalita.ForeColor = System.Drawing.Color.White;
-            this.btnMenuBalita.Location = new System.Drawing.Point(0, 132);
-            this.btnMenuBalita.Name = "btnMenuBalita";
-            this.btnMenuBalita.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
-            this.btnMenuBalita.Size = new System.Drawing.Size(200, 44);
-            this.btnMenuBalita.TabIndex = 3;
-            this.btnMenuBalita.Text = "Kelola Balita";
-            this.btnMenuBalita.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnMenuBalita.UseVisualStyleBackColor = true;
-            this.btnMenuBalita.Click += new System.EventHandler(this.btnMenuBalita_Click);
+            this.btnMenuPertumbuhan.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnMenuPertumbuhan.FlatAppearance.BorderSize = 0;
+            this.btnMenuPertumbuhan.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMenuPertumbuhan.ForeColor = System.Drawing.Color.White;
+            this.btnMenuPertumbuhan.Location = new System.Drawing.Point(0, 176);
+            this.btnMenuPertumbuhan.Name = "btnMenuPertumbuhan";
+            this.btnMenuPertumbuhan.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
+            this.btnMenuPertumbuhan.Size = new System.Drawing.Size(200, 44);
+            this.btnMenuPertumbuhan.TabIndex = 7;
+            this.btnMenuPertumbuhan.Text = "Pertumbuhan Balita";
+            this.btnMenuPertumbuhan.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnMenuPertumbuhan.UseVisualStyleBackColor = true;
+            this.btnMenuPertumbuhan.Click += new System.EventHandler(this.btnMenuPertumbuhan_Click);
+            // 
+            // btnMenuImunisasi
+            // 
+            this.btnMenuImunisasi.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnMenuImunisasi.FlatAppearance.BorderSize = 0;
+            this.btnMenuImunisasi.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMenuImunisasi.ForeColor = System.Drawing.Color.White;
+            this.btnMenuImunisasi.Location = new System.Drawing.Point(0, 132);
+            this.btnMenuImunisasi.Name = "btnMenuImunisasi";
+            this.btnMenuImunisasi.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
+            this.btnMenuImunisasi.Size = new System.Drawing.Size(200, 44);
+            this.btnMenuImunisasi.TabIndex = 1;
+            this.btnMenuImunisasi.Text = "Input Imunisasi";
+            this.btnMenuImunisasi.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnMenuImunisasi.UseVisualStyleBackColor = true;
+            this.btnMenuImunisasi.Click += new System.EventHandler(this.btnMenuImunisasi_Click);
             // 
             // btnMenuJadwal
             // 
@@ -122,37 +140,37 @@
             this.btnMenuJadwal.UseVisualStyleBackColor = true;
             this.btnMenuJadwal.Click += new System.EventHandler(this.btnMenuJadwal_Click);
             // 
-            // btnMenuImunisasi
+            // btnMenuBalita
             // 
-            this.btnMenuImunisasi.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnMenuImunisasi.FlatAppearance.BorderSize = 0;
-            this.btnMenuImunisasi.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnMenuImunisasi.ForeColor = System.Drawing.Color.White;
-            this.btnMenuImunisasi.Location = new System.Drawing.Point(0, 44);
-            this.btnMenuImunisasi.Name = "btnMenuImunisasi";
-            this.btnMenuImunisasi.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
-            this.btnMenuImunisasi.Size = new System.Drawing.Size(200, 44);
-            this.btnMenuImunisasi.TabIndex = 1;
-            this.btnMenuImunisasi.Text = "Input Imunisasi";
-            this.btnMenuImunisasi.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnMenuImunisasi.UseVisualStyleBackColor = true;
-            this.btnMenuImunisasi.Click += new System.EventHandler(this.btnMenuImunisasi_Click);
+            this.btnMenuBalita.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnMenuBalita.FlatAppearance.BorderSize = 0;
+            this.btnMenuBalita.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMenuBalita.ForeColor = System.Drawing.Color.White;
+            this.btnMenuBalita.Location = new System.Drawing.Point(0, 44);
+            this.btnMenuBalita.Name = "btnMenuBalita";
+            this.btnMenuBalita.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
+            this.btnMenuBalita.Size = new System.Drawing.Size(200, 44);
+            this.btnMenuBalita.TabIndex = 3;
+            this.btnMenuBalita.Text = "Kelola Balita";
+            this.btnMenuBalita.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnMenuBalita.UseVisualStyleBackColor = true;
+            this.btnMenuBalita.Click += new System.EventHandler(this.btnMenuBalita_Click);
             // 
-            // btnMenuLaporan
+            // btnMenuVaksin
             // 
-            this.btnMenuLaporan.Dock = System.Windows.Forms.DockStyle.Top;
-            this.btnMenuLaporan.FlatAppearance.BorderSize = 0;
-            this.btnMenuLaporan.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnMenuLaporan.ForeColor = System.Drawing.Color.White;
-            this.btnMenuLaporan.Location = new System.Drawing.Point(0, 0);
-            this.btnMenuLaporan.Name = "btnMenuLaporan";
-            this.btnMenuLaporan.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
-            this.btnMenuLaporan.Size = new System.Drawing.Size(200, 44);
-            this.btnMenuLaporan.TabIndex = 0;
-            this.btnMenuLaporan.Text = "Laporan";
-            this.btnMenuLaporan.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnMenuLaporan.UseVisualStyleBackColor = true;
-            this.btnMenuLaporan.Click += new System.EventHandler(this.btnMenuLaporan_Click);
+            this.btnMenuVaksin.Dock = System.Windows.Forms.DockStyle.Top;
+            this.btnMenuVaksin.FlatAppearance.BorderSize = 0;
+            this.btnMenuVaksin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMenuVaksin.ForeColor = System.Drawing.Color.White;
+            this.btnMenuVaksin.Location = new System.Drawing.Point(0, 0);
+            this.btnMenuVaksin.Name = "btnMenuVaksin";
+            this.btnMenuVaksin.Padding = new System.Windows.Forms.Padding(15, 0, 0, 0);
+            this.btnMenuVaksin.Size = new System.Drawing.Size(200, 44);
+            this.btnMenuVaksin.TabIndex = 4;
+            this.btnMenuVaksin.Text = "Kelola Vaksin";
+            this.btnMenuVaksin.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnMenuVaksin.UseVisualStyleBackColor = true;
+            this.btnMenuVaksin.Click += new System.EventHandler(this.btnMenuVaksin_Click);
             // 
             // pnlContent
             // 
@@ -200,6 +218,7 @@
         private System.Windows.Forms.Button btnMenuBalita;
         private System.Windows.Forms.Button btnMenuJadwal;
         private System.Windows.Forms.Button btnMenuImunisasi;
+        private System.Windows.Forms.Button btnMenuPertumbuhan; // Deklarasi tombol baru
         private System.Windows.Forms.Button btnMenuLaporan;
         private System.Windows.Forms.Panel pnlContent;
         private System.Windows.Forms.PictureBox pictureBox1;
