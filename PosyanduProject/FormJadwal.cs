@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Drawing;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace PosyanduProject
@@ -14,6 +16,44 @@ namespace PosyanduProject
 
         private void FormJadwal_Load(object sender, EventArgs e)
         {
+            // [REVISI] Mengunci ID dan membatasi panjang input
+            if (txtIdJadwal != null) txtIdJadwal.ReadOnly = true;
+            if (txtLokasi != null) txtLokasi.MaxLength = 100;
+            if (txtKeterangan != null) txtKeterangan.MaxLength = 255;
+
+            // [REVISI TANGGAL] Membatasi batas atas dan bawah kalender
+            if (dtpPelaksanaan != null)
+            {
+                // Mengizinkan mundur 5 tahun agar tidak error saat klik data jadwal lama di DataGridView
+                dtpPelaksanaan.MinDate = DateTime.Today.AddYears(-5);
+
+                // Mencegah user iseng memilih sampai tahun 9999 (dibatasi maksimal 2 tahun ke depan)
+                dtpPelaksanaan.MaxDate = DateTime.Today.AddYears(2);
+            }
+
+            // [REVISI KEAMANAN & UI] Menonaktifkan dan MENYEMBUNYIKAN fitur jika yang login adalah Orang Tua
+            if (SessionManager.Role == "OrangTua")
+            {
+                // 1. Sembunyikan semua tombol aksi (CRUD)
+                if (btnTambah != null) btnTambah.Visible = false;
+                if (btnUpdate != null) btnUpdate.Visible = false;
+                if (btnHapus != null) btnHapus.Visible = false;
+                if (btnBersih != null) btnBersih.Visible = false;
+
+                // 2. Sembunyikan semua kotak inputan agar UI bersih
+                if (dtpPelaksanaan != null) dtpPelaksanaan.Visible = false;
+                if (txtLokasi != null) txtLokasi.Visible = false;
+                if (txtKeterangan != null) txtKeterangan.Visible = false;
+                if (txtIdJadwal != null) txtIdJadwal.Visible = false;
+
+                // 3. Sembunyikan Teks Label
+                // Ganti label1, label2, dll dengan nama (Name) label Anda yang ada di Properties Design
+                if (label1 != null) label1.Visible = false;
+                if (label2 != null) label2.Visible = false;
+                if (label3 != null) label3.Visible = false;
+                if (label4 != null) label4.Visible = false;
+            }
+
             TampilkanData();
         }
 
@@ -86,6 +126,25 @@ namespace PosyanduProject
         {
             if (!Validasi()) return;
 
+            // [REVISI] Validasi Tanggal agar tidak membuat jadwal di masa lalu saat ditambah
+            if (dtpPelaksanaan.Value.Date < DateTime.Today)
+            {
+                MessageBox.Show("Tidak dapat membuat jadwal untuk masa lalu!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // [REVISI] Mencegah jadwal ganda (Tanggal dan Lokasi yang sama persis)
+            int dupCount = Convert.ToInt32(DatabaseHelper.ExecuteScalar(
+                "SELECT COUNT(*) FROM Jadwal_Posyandu WHERE tgl_pelaksanaan = @tgl AND lokasi = @lok",
+                new SqlParameter("@tgl", dtpPelaksanaan.Value.Date),
+                new SqlParameter("@lok", txtLokasi.Text.Trim())));
+
+            if (dupCount > 0)
+            {
+                MessageBox.Show("Jadwal untuk tanggal dan lokasi tersebut sudah ada!", "Duplikasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             try
             {
                 string sql = "INSERT INTO Jadwal_Posyandu (tgl_pelaksanaan, lokasi, keterangan) VALUES (@tgl, @lok, @ket)";
@@ -108,6 +167,20 @@ namespace PosyanduProject
         {
             if (string.IsNullOrWhiteSpace(txtIdJadwal.Text)) { Warn(); return; }
             if (!Validasi()) return;
+
+            // [REVISI] Mencegah jadwal ganda saat diupdate (Kecuali ID-nya sendiri)
+            int dupCount = Convert.ToInt32(DatabaseHelper.ExecuteScalar(
+                "SELECT COUNT(*) FROM Jadwal_Posyandu WHERE tgl_pelaksanaan = @tgl AND lokasi = @lok AND id_jadwal != @id",
+                new SqlParameter("@tgl", dtpPelaksanaan.Value.Date),
+                new SqlParameter("@lok", txtLokasi.Text.Trim()),
+                new SqlParameter("@id", int.Parse(txtIdJadwal.Text))));
+
+            if (dupCount > 0)
+            {
+                MessageBox.Show("Jadwal untuk tanggal dan lokasi tersebut bentrok dengan jadwal lain!", "Duplikasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (MessageBox.Show("Ubah jadwal ini?", "Konfirmasi", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
 
             try
@@ -167,6 +240,14 @@ namespace PosyanduProject
                 txtLokasi.Focus();
                 return false;
             }
+
+            // [REVISI] Mencegah input simbol aneh di lokasi
+            if (Regex.IsMatch(txtLokasi.Text, @"[@#$%^&*<>]"))
+            {
+                MessageBox.Show("Lokasi tidak boleh mengandung simbol khusus (@, #, $, dll)!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
             return true;
         }
 

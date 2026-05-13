@@ -55,6 +55,7 @@
             this.label1.Size = new System.Drawing.Size(66, 16);
             this.label1.TabIndex = 0;
             this.label1.Text = "ID Jadwal";
+            this.label1.Visible = false;
             // 
             // txtIdJadwal
             // 
@@ -63,6 +64,7 @@
             this.txtIdJadwal.ReadOnly = true;
             this.txtIdJadwal.Size = new System.Drawing.Size(63, 22);
             this.txtIdJadwal.TabIndex = 1;
+            this.txtIdJadwal.Visible = false;
             // 
             // label2
             // 
