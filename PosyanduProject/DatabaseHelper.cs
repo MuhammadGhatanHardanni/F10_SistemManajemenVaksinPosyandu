@@ -7,7 +7,7 @@ namespace PosyanduProject
     public static class DatabaseHelper
     {
         private const string _connectionString =
-            @"Server=LAPTOP-VL5SDNPR\GHATANHARDANNI;Database=PosyanduVaksin;Integrated Security=True;";
+            @"Server=LAPTOP-VL5SDNPR\GHATANHARDANNI;Database=PosyanduVaksinProject;Integrated Security=True;";
 
         public static SqlConnection GetConnection()
         {
