@@ -59,6 +59,7 @@
             this.label1.Size = new System.Drawing.Size(57, 16);
             this.label1.TabIndex = 0;
             this.label1.Text = "ID Balita";
+            this.label1.Visible = false;
             // 
             // txtIdBalita
             // 
@@ -66,6 +67,7 @@
             this.txtIdBalita.Name = "txtIdBalita";
             this.txtIdBalita.Size = new System.Drawing.Size(57, 22);
             this.txtIdBalita.TabIndex = 1;
+            this.txtIdBalita.Visible = false;
             // 
             // label2
             // 
@@ -83,6 +85,7 @@
             this.txtNik.Name = "txtNik";
             this.txtNik.Size = new System.Drawing.Size(144, 22);
             this.txtNik.TabIndex = 3;
+            this.txtNik.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtNik_KeyPress);
             // 
             // label3
             // 
@@ -99,6 +102,7 @@
             this.txtNamaBalita.Name = "txtNamaBalita";
             this.txtNamaBalita.Size = new System.Drawing.Size(147, 22);
             this.txtNamaBalita.TabIndex = 5;
+            this.txtNamaBalita.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtNamaBalita_KeyPress);
             // 
             // label4
             // 
