@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Drawing;
+using System.Text.RegularExpressions; // [REVISI] Untuk validasi simbol
 using System.Windows.Forms;
 
 namespace PosyanduProject
@@ -14,6 +16,18 @@ namespace PosyanduProject
 
         private void FormBalita_Load(object sender, EventArgs e)
         {
+            // [REVISI] Mengunci ID dan membatasi panjang input
+            if (txtIdBalita != null) txtIdBalita.ReadOnly = true;
+            if (txtNik != null) txtNik.MaxLength = 16;
+            if (txtNamaBalita != null) txtNamaBalita.MaxLength = 100;
+
+            // [REVISI TANGGAL] Membatasi kalender: Maksimal hari ini, Minimal 5 tahun lalu
+            if (dtpLahir != null)
+            {
+                dtpLahir.MaxDate = DateTime.Today; // Tidak bisa lahir di masa depan
+                dtpLahir.MinDate = DateTime.Today.AddYears(-5); // Definisi Balita (Bawah 5 Tahun)
+            }
+
             if (cmbJenisKelamin != null && cmbJenisKelamin.Items.Count == 0)
             {
                 cmbJenisKelamin.Items.AddRange(new[] { "L - Laki-laki", "P - Perempuan" });
@@ -34,8 +48,8 @@ namespace PosyanduProject
                 {
                     cmbOrangTua.DataSource = dt;
                     cmbOrangTua.DisplayMember = "nama_lengkap";
-                    cmbOrangTua.ValueMember = "id_user";       
-                    cmbOrangTua.SelectedIndex = -1;           
+                    cmbOrangTua.ValueMember = "id_user";
+                    cmbOrangTua.SelectedIndex = -1;
                 }
             }
             catch (Exception ex)
@@ -143,15 +157,27 @@ namespace PosyanduProject
                     new SqlParameter("@jk", jk),
                     new SqlParameter("@ortu", cmbOrangTua.Text.Trim()));
 
-                if (baris > 0) { MessageBox.Show("Data balita berhasil ditambah!"); BersihForm(); TampilkanData(); }
+                if (baris > 0) { MessageBox.Show("Data balita berhasil ditambah!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information); BersihForm(); TampilkanData(); }
             }
             catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); }
         }
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtIdBalita.Text)) { MessageBox.Show("Pilih data dulu!"); return; }
+            if (string.IsNullOrWhiteSpace(txtIdBalita.Text)) { MessageBox.Show("Pilih data dulu dari tabel!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
             if (!Validasi()) return;
+
+            // [REVISI] Cek duplikasi NIK saat UPDATE (Kecuali ID-nya sendiri)
+            int dupNik = Convert.ToInt32(DatabaseHelper.ExecuteScalar(
+                "SELECT COUNT(*) FROM Balita WHERE nik = @nik AND id_balita != @id",
+                new SqlParameter("@nik", txtNik.Text.Trim()),
+                new SqlParameter("@id", int.Parse(txtIdBalita.Text))));
+
+            if (dupNik > 0)
+            {
+                MessageBox.Show("NIK ini sudah terdaftar pada balita lain!", "Duplikasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             try
             {
@@ -168,14 +194,14 @@ namespace PosyanduProject
                     new SqlParameter("@ortu", cmbOrangTua.Text.Trim()),
                     new SqlParameter("@id", int.Parse(txtIdBalita.Text)));
 
-                if (baris > 0) { MessageBox.Show("Data berhasil diperbarui!"); BersihForm(); TampilkanData(); }
+                if (baris > 0) { MessageBox.Show("Data berhasil diperbarui!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information); BersihForm(); TampilkanData(); }
             }
             catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); }
         }
 
         private void btnHapus_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtIdBalita.Text)) { MessageBox.Show("Pilih data dulu!"); return; }
+            if (string.IsNullOrWhiteSpace(txtIdBalita.Text)) { MessageBox.Show("Pilih data dulu dari tabel!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
             if (MessageBox.Show("Yakin HAPUS data balita ini?", "Konfirmasi Hapus", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
 
             int dipakai = Convert.ToInt32(DatabaseHelper.ExecuteScalar(
@@ -191,7 +217,7 @@ namespace PosyanduProject
             try
             {
                 int baris = DatabaseHelper.ExecuteNonQuery("DELETE FROM Balita WHERE id_balita=@id", new SqlParameter("@id", int.Parse(txtIdBalita.Text)));
-                if (baris > 0) { MessageBox.Show("Data berhasil dihapus!"); BersihForm(); TampilkanData(); }
+                if (baris > 0) { MessageBox.Show("Data berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information); BersihForm(); TampilkanData(); }
             }
             catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); }
         }
@@ -201,16 +227,22 @@ namespace PosyanduProject
         private bool Validasi()
         {
             if (string.IsNullOrWhiteSpace(txtNik.Text) || txtNik.Text.Trim().Length != 16)
-            { MessageBox.Show("NIK harus tepat 16 digit!"); txtNik.Focus(); return false; }
+            { MessageBox.Show("NIK harus tepat 16 digit!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtNik.Focus(); return false; }
 
             if (string.IsNullOrWhiteSpace(txtNamaBalita.Text))
-            { MessageBox.Show("Nama balita tidak boleh kosong!"); txtNamaBalita.Focus(); return false; }
+            { MessageBox.Show("Nama balita tidak boleh kosong!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); txtNamaBalita.Focus(); return false; }
+
+            // [REVISI] Mencegah input simbol aneh di nama
+            if (Regex.IsMatch(txtNamaBalita.Text, @"[@#$%^&*<>]"))
+            {
+                MessageBox.Show("Nama balita tidak boleh mengandung simbol khusus (@, #, $, dll)!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false;
+            }
 
             if (dtpLahir != null && dtpLahir.Value.Date > DateTime.Today)
-            { MessageBox.Show("Tanggal lahir tidak valid (masa depan)!"); return false; }
+            { MessageBox.Show("Tanggal lahir tidak valid (masa depan)!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false; }
 
             if (cmbOrangTua == null || cmbOrangTua.SelectedValue == null || cmbOrangTua.SelectedIndex == -1)
-            { MessageBox.Show("Pilih nama orang tua terlebih dahulu!"); cmbOrangTua?.Focus(); return false; }
+            { MessageBox.Show("Pilih nama orang tua terlebih dahulu!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); cmbOrangTua?.Focus(); return false; }
 
             return true;
         }
@@ -222,8 +254,31 @@ namespace PosyanduProject
             if (txtNamaBalita != null) txtNamaBalita.Clear();
             if (dtpLahir != null) dtpLahir.Value = DateTime.Today.AddYears(-1);
             if (cmbJenisKelamin != null) cmbJenisKelamin.SelectedIndex = 0;
-            if (cmbOrangTua != null) cmbOrangTua.SelectedIndex = -1; 
+            if (cmbOrangTua != null) cmbOrangTua.SelectedIndex = -1;
             if (txtCari != null) txtCari.Clear();
+        }
+
+        // [REVISI] Event untuk memblokir huruf pada kolom NIK secara real-time
+        private void txtNik_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true; // Memblokir input selain angka
+            }
+        }
+
+        // [REVISI] Event untuk memblokir angka pada kolom Nama Balita secara real-time
+        private void txtNamaBalita_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Mengizinkan huruf (IsLetter), spasi, tanda petik tunggal ('), strip (-), dan tombol kontrol (seperti Backspace)
+            if (!char.IsControl(e.KeyChar) &&
+                !char.IsLetter(e.KeyChar) &&
+                !char.IsWhiteSpace(e.KeyChar) &&
+                e.KeyChar != '\'' &&
+                e.KeyChar != '-')
+            {
+                e.Handled = true; // Memblokir input angka dan simbol aneh lainnya secara langsung
+            }
         }
     }
 }
