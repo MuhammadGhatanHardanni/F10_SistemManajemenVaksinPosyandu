@@ -15,8 +15,17 @@ namespace PosyanduProject
 
         private void FormLaporan_Load(object sender, EventArgs e)
         {
+            // Mencegah user mengedit isi tabel laporan
+            if (dgvLaporan != null)
+            {
+                dgvLaporan.ReadOnly = true;
+                dgvLaporan.AllowUserToAddRows = false;
+                dgvLaporan.AllowUserToDeleteRows = false;
+            }
+
             SetupFilterControls();
 
+            // Menerapkan tampilan berdasarkan Role
             if (SessionManager.Role == "OrangTua")
             {
                 ApplyOrangTuaView();
@@ -47,6 +56,7 @@ namespace PosyanduProject
 
         private void ApplyOrangTuaView()
         {
+            // Menyembunyikan elemen filter dan tombol stok khusus untuk Orang Tua
             if (btnRefreshStok != null) btnRefreshStok.Visible = false;
             if (btnFilterCakupan != null) btnFilterCakupan.Visible = false;
             if (cmbBulan != null) cmbBulan.Visible = false;
@@ -70,18 +80,25 @@ namespace PosyanduProject
                            FROM Vaksin v 
                            ORDER BY v.stok ASC";
 
-            DataTable dt = DatabaseHelper.GetDataTable(sql);
-            dgvLaporan.DataSource = dt;
-
-            foreach (DataGridViewRow row in dgvLaporan.Rows)
+            try
             {
-                string ket = row.Cells["Keterangan"].Value?.ToString() ?? "";
-                if (ket.Contains("KEDALUWARSA")) row.DefaultCellStyle.BackColor = Color.LightCoral;
-                else if (ket.Contains("Rendah")) row.DefaultCellStyle.BackColor = Color.LightYellow;
-            }
+                DataTable dt = DatabaseHelper.GetDataTable(sql);
+                dgvLaporan.DataSource = dt;
 
-            if (lblStatusLaporan != null)
-                lblStatusLaporan.Text = $"Mode: Rekap Stok | Total Jenis Vaksin: {dt.Rows.Count}";
+                foreach (DataGridViewRow row in dgvLaporan.Rows)
+                {
+                    string ket = row.Cells["Keterangan"].Value?.ToString() ?? "";
+                    if (ket.Contains("KEDALUWARSA")) row.DefaultCellStyle.BackColor = Color.LightCoral;
+                    else if (ket.Contains("Rendah")) row.DefaultCellStyle.BackColor = Color.LightYellow;
+                }
+
+                if (lblStatusLaporan != null)
+                    lblStatusLaporan.Text = $"Mode: Rekap Stok | Total Jenis Vaksin: {dt.Rows.Count}";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal memuat laporan stok: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void LoadCakupanImunisasi()
@@ -89,6 +106,8 @@ namespace PosyanduProject
             if (dgvLaporan == null || cmbBulan == null || cmbTahun == null) return;
 
             int bulan = cmbBulan.SelectedIndex + 1;
+
+            if (cmbTahun.SelectedItem == null) return;
             int tahun = Convert.ToInt32(cmbTahun.SelectedItem);
 
             string sql = @"SELECT b.nama_balita AS [Nama Anak], 
@@ -103,14 +122,21 @@ namespace PosyanduProject
                            WHERE MONTH(ti.tgl_suntik) = @bln AND YEAR(ti.tgl_suntik) = @thn
                            ORDER BY ti.tgl_suntik DESC";
 
-            DataTable dt = DatabaseHelper.GetDataTable(sql,
-                           new SqlParameter("@bln", bulan),
-                           new SqlParameter("@thn", tahun));
+            try
+            {
+                DataTable dt = DatabaseHelper.GetDataTable(sql,
+                               new SqlParameter("@bln", bulan),
+                               new SqlParameter("@thn", tahun));
 
-            dgvLaporan.DataSource = dt;
+                dgvLaporan.DataSource = dt;
 
-            if (lblStatusLaporan != null)
-                lblStatusLaporan.Text = $"Mode: Cakupan {cmbBulan.Text} {tahun} | Total: {dt.Rows.Count} Transaksi";
+                if (lblStatusLaporan != null)
+                    lblStatusLaporan.Text = $"Mode: Cakupan {cmbBulan.Text} {tahun} | Total: {dt.Rows.Count} Transaksi";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal memuat cakupan imunisasi: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void LoadRiwayatOrangTua()
@@ -128,11 +154,20 @@ namespace PosyanduProject
                            WHERE u.id_user = @uid
                            ORDER BY ti.tgl_suntik DESC";
 
-            DataTable dt = DatabaseHelper.GetDataTable(sql, new SqlParameter("@uid", SessionManager.IdUser));
-            dgvLaporan.DataSource = dt;
+            try
+            {
+                // Menggunakan ID dari user (Orang Tua) yang sedang login
+                DataTable dt = DatabaseHelper.GetDataTable(sql, new SqlParameter("@uid", SessionManager.IdUser));
 
-            if (lblStatusLaporan != null)
-                lblStatusLaporan.Text = $"Riwayat Imunisasi Anak Anda ({dt.Rows.Count} Data)";
+                dgvLaporan.DataSource = dt;
+
+                if (lblStatusLaporan != null)
+                    lblStatusLaporan.Text = $"Riwayat Imunisasi Anak Anda ({dt.Rows.Count} Data)";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal memuat riwayat: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void btnRefreshStok_Click(object sender, EventArgs e) => LoadLaporanStok();
