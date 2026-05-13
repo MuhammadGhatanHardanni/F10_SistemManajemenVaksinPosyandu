@@ -62,6 +62,7 @@
             this.label1.Size = new System.Drawing.Size(20, 16);
             this.label1.TabIndex = 0;
             this.label1.Text = "ID";
+            this.label1.Visible = false;
             // 
             // txtIdImunisasi
             // 
@@ -71,6 +72,7 @@
             this.txtIdImunisasi.ReadOnly = true;
             this.txtIdImunisasi.Size = new System.Drawing.Size(100, 22);
             this.txtIdImunisasi.TabIndex = 1;
+            this.txtIdImunisasi.Visible = false;
             // 
             // label2
             // 
@@ -107,6 +109,7 @@
             this.cmbVaksin.Name = "cmbVaksin";
             this.cmbVaksin.Size = new System.Drawing.Size(141, 24);
             this.cmbVaksin.TabIndex = 5;
+            this.cmbVaksin.SelectedIndexChanged += new System.EventHandler(this.cmbVaksin_SelectedIndexChanged);
             // 
             // txtStokInfo
             // 
@@ -149,6 +152,7 @@
             this.txtNoAntrean.Name = "txtNoAntrean";
             this.txtNoAntrean.Size = new System.Drawing.Size(100, 22);
             this.txtNoAntrean.TabIndex = 10;
+            this.txtNoAntrean.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtNoAntrean_KeyPress);
             // 
             // label5
             // 
