@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
 using System.Windows.Forms;
 
 namespace PosyanduProject
@@ -14,7 +13,6 @@ namespace PosyanduProject
 
         private void FormLogin_Load(object sender, EventArgs e)
         {
-            // [REVISI UX] Memastikan ketikan di kolom password disamarkan di awal
             if (txtPassword != null)
             {
                 txtPassword.UseSystemPasswordChar = true;
@@ -33,15 +31,16 @@ namespace PosyanduProject
 
             try
             {
-                // Menggunakan parameterized query untuk mencegah SQL Injection
-                string sql = @"SELECT id_user, nama_lengkap, username, role 
-                               FROM Users 
-                               WHERE username = @uname AND password = @pwd";
 
-                DataTable dt = DatabaseHelper.GetDataTable(sql,
-                    new SqlParameter("@uname", txtUsername.Text.Trim()),
-                    new SqlParameter("@pwd", txtPassword.Text.Trim())
-                );
+                string username = txtUsername.Text.Trim();
+                string password = txtPassword.Text.Trim();
+
+                // Menggabungkan string secara langsung
+                string sql = "SELECT id_user, nama_lengkap, username, role " +
+                             "FROM Users " +
+                             "WHERE username = '" + username + "' AND password = '" + password + "'";
+
+                DataTable dt = DatabaseHelper.GetDataTable(sql);
 
                 if (dt.Rows.Count > 0)
                 {
@@ -92,24 +91,8 @@ namespace PosyanduProject
             }
         }
 
-        // [FITUR BARU] Event ketika CheckBox Show Password di klik/berubah
-        private void chkShowPassword_CheckedChanged(object sender, EventArgs e)
-        {
-            if (txtPassword != null)
-            {
-                if (chkShowPassword.Checked)
-                {
-                    // Tampilkan tulisan asli (buka topeng sistem & topeng cadangan)
-                    txtPassword.UseSystemPasswordChar = false;
-                    txtPassword.PasswordChar = '\0'; // \0 artinya karakter kosong/dihapus
-                }
-                else
-                {
-                    // Samarkan kembali
-                    txtPassword.UseSystemPasswordChar = true;
-                }
-            }
-        }
+        // Event ketika CheckBox Show Password di klik/berubah
+        
 
         private void linkDaftar_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
