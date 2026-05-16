@@ -1,30 +1,38 @@
-Screenshot Hasil Sistem Ketika Dijalankan
+Koneksi Ke Database
 
-Form koneksi
-<img width="541" height="339" alt="image" src="https://github.com/user-attachments/assets/c9b45235-fdb3-422f-be4c-7959ab6b89bc" />
+<img width="502" height="443" alt="image" src="https://github.com/user-attachments/assets/1237ab33-e3d8-4abe-b1f7-5386ff6eb3a4" />
 
-Form input data
-<img width="1919" height="1016" alt="image" src="https://github.com/user-attachments/assets/2101cc59-811e-4807-8398-8fa62ef2848a" />
+ditandai dengan muncul pada form Login
 
-Form tampilan data
-<img width="1374" height="250" alt="image" src="https://github.com/user-attachments/assets/d8cdce60-2d96-401a-ba73-af1e5dc77361" />
 
-Bukti insert, update, delete, dan search
+Form Insert Data
 
-- Insert
-  <img width="1919" height="1021" alt="image" src="https://github.com/user-attachments/assets/d1f7e204-3dd8-4468-b822-a7e3e4f5efc6" />
+<img width="1919" height="1021" alt="image" src="https://github.com/user-attachments/assets/a2a5e7e3-3550-41ad-8b10-b79da002b7d6" />
 
-- Update
-  <img width="1919" height="1021" alt="image" src="https://github.com/user-attachments/assets/d1763e67-7a7b-404a-9646-3a4a13fbc626" />
-  <img width="1919" height="1017" alt="image" src="https://github.com/user-attachments/assets/b300e9a5-0a41-47b0-89e0-7651c85ff3fa" />
 
-- Delete
-  <img width="1919" height="1018" alt="image" src="https://github.com/user-attachments/assets/29983486-27cc-4c4a-a530-6aeff821daa5" />
-  <img width="1919" height="1018" alt="image" src="https://github.com/user-attachments/assets/388d5a50-5bb3-45c7-8ff8-f8706ef443a9" />
-  <img width="1919" height="1018" alt="image" src="https://github.com/user-attachments/assets/9fcb234d-3e59-4f82-b85b-a133d53d66c2" />
+Form Tampil Data
 
-- search
-  <img width="1919" height="1021" alt="image" src="https://github.com/user-attachments/assets/a8409052-d864-4de0-9045-afd7f12bae1f" />
+<img width="1919" height="1018" alt="image" src="https://github.com/user-attachments/assets/ee864d30-f2a2-4c65-81e4-a630ab57ece8" />
+
+
+Bukti Insert, Update, Delete dan Search
+
+insert
+<img width="1919" height="1018" alt="image" src="https://github.com/user-attachments/assets/33118893-8dfa-4019-b477-e9fd09a39e52" />
+
+update
+<img width="1919" height="1017" alt="image" src="https://github.com/user-attachments/assets/c699de06-c075-436e-ae5d-0783873a4f83" />
+<img width="1919" height="1014" alt="image" src="https://github.com/user-attachments/assets/b6a1d681-6129-45d4-beed-cf06f9c9c973" />
+
+delete
+<img width="1919" height="1019" alt="image" src="https://github.com/user-attachments/assets/fd661a1c-d525-4fb7-ad2b-69dd2cb671da" />
+<img width="1919" height="1018" alt="image" src="https://github.com/user-attachments/assets/5526ac7e-9d42-4edf-88ba-7fa0eedea67e" />
+<img width="1919" height="1021" alt="image" src="https://github.com/user-attachments/assets/d8f3d3be-b200-44c7-a6cf-b818eda2af0f" />
+
+search
+<img width="1919" height="1024" alt="image" src="https://github.com/user-attachments/assets/384767ad-5316-4eda-8f07-8ca7d4a11fe5" />
+
+
 
 
 
