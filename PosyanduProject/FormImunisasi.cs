@@ -8,6 +8,10 @@ namespace PosyanduProject
 {
     public partial class FormImunisasi : Form
     {
+        // 1. Variabel Disconnected Architecture (Modul 8)
+        private BindingSource bindingSource = new BindingSource();
+        private DataTable dtImunisasi = new DataTable();
+
         public FormImunisasi()
         {
             InitializeComponent();
@@ -15,19 +19,13 @@ namespace PosyanduProject
 
         private void FormImunisasi_Load(object sender, EventArgs e)
         {
-            // [REVISI] Mengunci ID agar tidak bisa diedit manual
             if (txtIdImunisasi != null) txtIdImunisasi.ReadOnly = true;
-
-            // [FITUR BARU] Mengunci TextBox Info Stok agar tidak bisa diedit manual oleh user
             if (txtStokInfo != null) txtStokInfo.ReadOnly = true;
 
-            // [REVISI TANGGAL] Membatasi pemilihan tahun di kalender
             if (dtpSuntik != null)
             {
-                // Memberikan kelonggaran 1 tahun ke depan agar DateTime.Now beserta jamnya tidak error.
-                // Input masa depan tetap akan ditolak oleh fungsi Validasi().
                 dtpSuntik.MaxDate = DateTime.Today.AddYears(1);
-                dtpSuntik.MinDate = DateTime.Today.AddYears(-5); // Minimal mundur 5 tahun (usia maksimal balita)
+                dtpSuntik.MinDate = DateTime.Today.AddYears(-5);
             }
 
             if (cmbStatus != null && cmbStatus.Items.Count == 0)
@@ -36,8 +34,16 @@ namespace PosyanduProject
                 cmbStatus.SelectedIndex = 0;
             }
 
+            // === PENGATURAN BINDING NAVIGATOR (Modul 8) ===
+            if (bindingNavigator1 != null)
+            {
+                bindingNavigator1.BindingSource = bindingSource;
+            }
+            bindingSource.CurrentChanged += bindingSource_CurrentChanged;
+            // ==============================================
+
             LoadComboBoxes();
-            TampilkanData();
+            LoadData(); // Memanggil VIEW (Modul 9)
         }
 
         private void LoadComboBoxes()
@@ -52,10 +58,8 @@ namespace PosyanduProject
                     cmbBalita.Items.Add(new ComboItem(Convert.ToInt32(r["id_balita"]), r["nama_balita"].ToString()));
 
                 cmbVaksin.Items.Clear();
-                // [REVISI] Hanya ambil vaksin yang stoknya > 0
                 var dtV = DatabaseHelper.GetDataTable("SELECT id_vaksin, nama_vaksin, stok FROM Vaksin WHERE stok > 0 ORDER BY nama_vaksin");
                 foreach (DataRow r in dtV.Rows)
-                    // Hapus info stok dari nama vaksin di dropdown, karena sekarang akan ditampilkan di txtStokInfo
                     cmbVaksin.Items.Add(new ComboItem(Convert.ToInt32(r["id_vaksin"]), r["nama_vaksin"].ToString()));
 
                 cmbJadwal.Items.Clear();
@@ -70,7 +74,6 @@ namespace PosyanduProject
             catch (Exception ex) { MessageBox.Show("Gagal memuat dropdown: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); }
         }
 
-        // [FITUR BARU] Event ketika ComboBox Vaksin berubah pilihan
         private void cmbVaksin_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cmbVaksin.SelectedItem == null || txtStokInfo == null)
@@ -82,70 +85,130 @@ namespace PosyanduProject
             try
             {
                 var vks = (ComboItem)cmbVaksin.SelectedItem;
-                // Ambil sisa stok vaksin langsung dari database berdasarkan ID yang dipilih
                 object stok = DatabaseHelper.ExecuteScalar(
                     "SELECT stok FROM Vaksin WHERE id_vaksin = @id",
                     new SqlParameter("@id", vks.Id));
 
                 if (stok != null)
                 {
-                    txtStokInfo.Text = stok.ToString() + " Dosis"; // Munculkan teks di TextBox
+                    txtStokInfo.Text = stok.ToString() + " Dosis";
 
-                    // Opsional: Beri warna merah jika stok menipis (<= 5)
                     if (Convert.ToInt32(stok) <= 5)
                         txtStokInfo.BackColor = Color.LightCoral;
                     else
                         txtStokInfo.BackColor = SystemColors.Control;
                 }
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Gagal mengambil info stok: " + ex.Message);
-            }
+            catch (Exception ex) { MessageBox.Show("Gagal mengambil info stok: " + ex.Message); }
         }
 
-        private void TampilkanData(string filter = "")
+        // ==========================================
+        // 2. LOAD DATA MENGGUNAKAN VIEW (Modul 9)
+        // ==========================================
+        private void LoadData()
         {
-            if (dgvImunisasi == null) return;
-
-            string sql = @"SELECT ti.id_imunisasi AS [ID], 
-                                  b.nama_balita AS [Nama Balita], 
-                                  v.nama_vaksin AS [Vaksin],
-                                  CONVERT(varchar,j.tgl_pelaksanaan,106) + ' - ' + j.lokasi AS [Jadwal],
-                                  ti.no_antrean AS [No. Antrean], 
-                                  CONVERT(varchar,ti.tgl_suntik,103) AS [Tgl Suntik], 
-                                  ti.status AS [Status]
-                           FROM Transaksi_Imunisasi ti
-                           JOIN Balita b ON b.id_balita = ti.id_balita
-                           JOIN Vaksin v ON v.id_vaksin = ti.id_vaksin
-                           JOIN Jadwal_Posyandu j ON j.id_jadwal = ti.id_jadwal";
-
             try
             {
-                DataTable dt;
-                if (!string.IsNullOrEmpty(filter))
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
                 {
-                    sql += " WHERE b.nama_balita LIKE @f ORDER BY ti.tgl_suntik DESC";
-                    dt = DatabaseHelper.GetDataTable(sql, new SqlParameter("@f", "%" + filter.Trim() + "%"));
-                }
-                else
-                {
-                    sql += " ORDER BY ti.tgl_suntik DESC";
-                    dt = DatabaseHelper.GetDataTable(sql);
+                    string query = "SELECT * FROM vwImunisasiPublic";
+                    using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
+                    {
+                        dtImunisasi = new DataTable();
+                        da.Fill(dtImunisasi);
+
+                        bindingSource.DataSource = dtImunisasi;
+                        if (dgvImunisasi != null) dgvImunisasi.DataSource = bindingSource;
+                    }
                 }
 
-                dgvImunisasi.DataSource = dt;
-
-                foreach (DataGridViewRow row in dgvImunisasi.Rows)
-                {
-                    string status = row.Cells["Status"].Value?.ToString();
-                    if (status == "Selesai") row.DefaultCellStyle.BackColor = Color.LightGreen;
-                    else if (status == "Batal") row.DefaultCellStyle.BackColor = Color.LightCoral;
-                }
+                FormatGrid(); // Panggil fungsi mewarnai tabel
+                HitungTotal(); // Panggil SP Count
             }
-            catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); }
+            catch (Exception ex) { MessageBox.Show("Gagal memuat data: " + ex.Message); }
         }
 
+        private void FormatGrid()
+        {
+            if (dgvImunisasi == null) return;
+            foreach (DataGridViewRow row in dgvImunisasi.Rows)
+            {
+                string status = row.Cells["Status"].Value?.ToString();
+                if (status == "Selesai") row.DefaultCellStyle.BackColor = Color.LightGreen;
+                else if (status == "Batal") row.DefaultCellStyle.BackColor = Color.LightCoral;
+            }
+        }
+
+        // === FUNGSI SAKTI: Sinkronisasi Class ComboItem saat Navigator digeser ===
+        private void bindingSource_CurrentChanged(object sender, EventArgs e)
+        {
+            if (bindingSource.Current == null) return;
+
+            DataRowView rowView = (DataRowView)bindingSource.Current;
+
+            txtIdImunisasi.Text = rowView["ID"].ToString();
+            if (txtNoAntrean != null) txtNoAntrean.Text = rowView["No. Antrean"].ToString();
+
+            string status = rowView["Status"].ToString();
+            if (cmbStatus.Items.Contains(status)) cmbStatus.SelectedItem = status;
+
+            string tglStr = rowView["Tgl Suntik"].ToString();
+
+            // Membaca format tanggal beserta jamnya secara spesifik
+            if (DateTime.TryParseExact(tglStr, "dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime tglExact))
+            {
+                if (dtpSuntik != null) dtpSuntik.Value = tglExact;
+            }
+            // Fallback jika formatnya berbeda
+            else if (DateTime.TryParse(tglStr, out DateTime tglFallback))
+            {
+                if (dtpSuntik != null) dtpSuntik.Value = tglFallback;
+            }
+
+            // Sinkronisasi ComboBox yang berisi Class ComboItem
+            string namaBlt = rowView["Nama Balita"].ToString();
+            foreach (ComboItem item in cmbBalita.Items) { if (item.Teks == namaBlt) { cmbBalita.SelectedItem = item; break; } }
+
+            string namaVks = rowView["Vaksin"].ToString();
+            foreach (ComboItem item in cmbVaksin.Items) { if (item.Teks == namaVks) { cmbVaksin.SelectedItem = item; break; } }
+
+            string infoJdw = rowView["Jadwal"].ToString();
+            foreach (ComboItem item in cmbJadwal.Items) { if (item.Teks == infoJdw) { cmbJadwal.SelectedItem = item; break; } }
+        }
+
+        // ==========================================
+        // 4. SP COUNT DENGAN OUTPUT PARAMETER (Modul 10)
+        // ==========================================
+        private void HitungTotal()
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_CountImunisasi", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        SqlParameter outputParam = new SqlParameter("@Total", SqlDbType.Int);
+                        outputParam.Direction = ParameterDirection.Output;
+                        cmd.Parameters.Add(outputParam);
+
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+
+                        if (lblTotal != null) // Pastikan lblTotal ditambahkan di Designer
+                        {
+                            lblTotal.Text = "Total Transaksi Imunisasi: " + outputParam.Value.ToString();
+                        }
+                        this.Text = "Manajemen Transaksi Imunisasi | " + outputParam.Value.ToString() + " Data";
+                    }
+                }
+            }
+            catch (Exception ex) { MessageBox.Show("Gagal menghitung total: " + ex.Message); }
+        }
+
+        // ==========================================
+        // 5. CRUD DENGAN STORED PROCEDURE & TRANSAKSI
+        // ==========================================
         private void btnSimpan_Click(object sender, EventArgs e)
         {
             if (!Validasi()) return;
@@ -154,7 +217,6 @@ namespace PosyanduProject
             var vks = (ComboItem)cmbVaksin.SelectedItem;
             var jdw = (ComboItem)cmbJadwal.SelectedItem;
 
-            // [REVISI] Cek duplikasi: Apakah anak ini sudah terdaftar imunisasi yang sama di jadwal yang sama?
             int cek = Convert.ToInt32(DatabaseHelper.ExecuteScalar(
                 "SELECT COUNT(*) FROM Transaksi_Imunisasi WHERE id_balita=@b AND id_vaksin=@v AND id_jadwal=@j",
                 new SqlParameter("@b", blt.Id),
@@ -167,33 +229,32 @@ namespace PosyanduProject
                 return;
             }
 
-            bool isSuccess = false; // Flag penanda transaksi sukses
+            bool isSuccess = false;
 
             try
             {
                 using (var conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
-                    using (var trx = conn.BeginTransaction())
+                    using (var trx = conn.BeginTransaction()) // LOGIKA TRANSAKSI ANDA DIPERTAHANKAN!
                     {
                         try
                         {
-                            string sqlInsert = @"INSERT INTO Transaksi_Imunisasi (id_balita, id_vaksin, id_jadwal, id_petugas, no_antrean, tgl_suntik, status) 
-                                                 VALUES (@b, @v, @j, @p, @no, @tgl, @st)";
-
-                            using (var cmd1 = new SqlCommand(sqlInsert, conn, trx))
+                            // [PERBAIKAN] Nama parameter disamakan persis dengan di SQL Server
+                            using (var cmd1 = new SqlCommand("sp_InsertImunisasi", conn, trx))
                             {
-                                cmd1.Parameters.AddWithValue("@b", blt.Id);
-                                cmd1.Parameters.AddWithValue("@v", vks.Id);
-                                cmd1.Parameters.AddWithValue("@j", jdw.Id);
-                                cmd1.Parameters.AddWithValue("@p", SessionManager.IdUser > 0 ? SessionManager.IdUser : 1);
-                                cmd1.Parameters.AddWithValue("@no", txtNoAntrean.Text.Trim());
-                                cmd1.Parameters.AddWithValue("@tgl", dtpSuntik.Value); // Menyimpan beserta jamnya
-                                cmd1.Parameters.AddWithValue("@st", cmbStatus.SelectedItem.ToString());
+                                cmd1.CommandType = CommandType.StoredProcedure;
+                                cmd1.Parameters.AddWithValue("@id_balita", blt.Id);
+                                cmd1.Parameters.AddWithValue("@id_vaksin", vks.Id);
+                                cmd1.Parameters.AddWithValue("@id_jadwal", jdw.Id);
+                                cmd1.Parameters.AddWithValue("@id_petugas", SessionManager.IdUser > 0 ? SessionManager.IdUser : 1);
+                                cmd1.Parameters.AddWithValue("@no_antrean", txtNoAntrean.Text.Trim());
+                                cmd1.Parameters.AddWithValue("@tgl_suntik", dtpSuntik.Value);
+                                cmd1.Parameters.AddWithValue("@status", cmbStatus.SelectedItem.ToString());
                                 cmd1.ExecuteNonQuery();
                             }
 
-                            // [REVISI] Hanya potong stok jika statusnya 'Selesai'
+                            // Hanya potong stok jika statusnya 'Selesai'
                             if (cmbStatus.SelectedItem.ToString() == "Selesai")
                             {
                                 using (var cmd2 = new SqlCommand("UPDATE Vaksin SET stok = stok - 1 WHERE id_vaksin = @id", conn, trx))
@@ -204,7 +265,7 @@ namespace PosyanduProject
                             }
 
                             trx.Commit();
-                            isSuccess = true; // Tandai bahwa database sudah aman
+                            isSuccess = true;
                         }
                         catch (Exception ex)
                         {
@@ -216,13 +277,12 @@ namespace PosyanduProject
             }
             catch (Exception ex) { MessageBox.Show("Koneksi Gagal: " + ex.Message); }
 
-            // Pindahkan proses bersih-bersih form ke luar blok transaksi try-catch
             if (isSuccess)
             {
                 MessageBox.Show("✅ Transaksi imunisasi berhasil disimpan!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 BersihForm();
-                LoadComboBoxes(); // Muat ulang combo box agar info stok terbaru terupdate
-                TampilkanData();
+                LoadComboBoxes();
+                LoadData();
             }
         }
 
@@ -232,53 +292,107 @@ namespace PosyanduProject
 
             try
             {
-                string sql = "UPDATE Transaksi_Imunisasi SET status=@st WHERE id_imunisasi=@id";
-                DatabaseHelper.ExecuteNonQuery(sql,
-                    new SqlParameter("@st", cmbStatus.SelectedItem.ToString()),
-                    new SqlParameter("@id", int.Parse(txtIdImunisasi.Text)));
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_UpdateImunisasi", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        // [PERBAIKAN] Nama parameter disamakan dengan SQL
+                        cmd.Parameters.AddWithValue("@status", cmbStatus.SelectedItem.ToString());
+                        cmd.Parameters.AddWithValue("@id", int.Parse(txtIdImunisasi.Text));
+
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 MessageBox.Show("✅ Status berhasil diperbarui!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                TampilkanData();
-                LoadComboBoxes(); // Refresh stok di form jika terjadi perubahan
+                LoadData();
+                LoadComboBoxes();
             }
             catch (Exception ex) { MessageBox.Show("Error Update: " + ex.Message); }
         }
 
-        private void dgvImunisasi_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void btnHapus_Click(object sender, EventArgs e)
         {
-            if (e.RowIndex < 0) return;
-            var row = dgvImunisasi.Rows[e.RowIndex];
-            txtIdImunisasi.Text = row.Cells["ID"].Value?.ToString() ?? "";
+            if (string.IsNullOrWhiteSpace(txtIdImunisasi.Text))
+            {
+                MessageBox.Show("Pilih data dulu dari tabel!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
-            string status = row.Cells["Status"].Value?.ToString();
-            if (cmbStatus.Items.Contains(status)) cmbStatus.SelectedItem = status;
+            if (MessageBox.Show("Yakin ingin menghapus data transaksi ini?", "Konfirmasi Hapus", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_DeleteImunisasi", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@id", int.Parse(txtIdImunisasi.Text));
+
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                MessageBox.Show("✅ Data transaksi berhasil dihapus!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                BersihForm();
+                LoadData();
+            }
+            catch (Exception ex) { MessageBox.Show("Gagal menghapus data: " + ex.Message); }
         }
 
-        private void btnCari_Click(object sender, EventArgs e) => TampilkanData(txtCari.Text.Trim());
+        private void btnCari_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_SearchImunisasi", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@keyword", txtCari.Text.Trim());
+
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            dtImunisasi = new DataTable();
+                            da.Fill(dtImunisasi);
+                            bindingSource.DataSource = dtImunisasi;
+                        }
+                    }
+                }
+                FormatGrid();
+            }
+            catch (Exception ex) { MessageBox.Show("Gagal mencari data: " + ex.Message); }
+        }
+
         private void btnBersih_Click(object sender, EventArgs e) => BersihForm();
+
+        private void dgvImunisasi_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Dikosongkan karena sinkronisasi sudah ditangani oleh bindingSource_CurrentChanged
+        }
 
         private bool Validasi()
         {
             if (cmbBalita.SelectedItem == null || cmbVaksin.SelectedItem == null || cmbJadwal.SelectedItem == null)
             {
-                MessageBox.Show("Harap pilih Balita, Vaksin, dan Jadwal!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
+                MessageBox.Show("Harap pilih Balita, Vaksin, dan Jadwal!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false;
             }
-
             if (string.IsNullOrWhiteSpace(txtNoAntrean.Text))
             {
-                MessageBox.Show("No. Antrean wajib diisi!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
+                MessageBox.Show("No. Antrean wajib diisi!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false;
             }
-
-            // [REVISI TANGGAL 1] Mencegah input tanggal di masa depan secara manual
             if (dtpSuntik.Value.Date > DateTime.Today)
             {
-                MessageBox.Show("Tanggal suntik tidak boleh di masa depan!", "Cacat Logika", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
+                MessageBox.Show("Tanggal suntik tidak boleh di masa depan!", "Cacat Logika", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false;
             }
 
-            // [REVISI TANGGAL 2] Validasi agar tanggal suntik tidak mendahului tanggal lahir Balita
+            // Validasi umur anak
             var blt = (ComboItem)cmbBalita.SelectedItem;
             try
             {
@@ -301,7 +415,6 @@ namespace PosyanduProject
             return true;
         }
 
-        // [REVISI] Hanya angka untuk nomor antrean
         private void txtNoAntrean_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar)) e.Handled = true;
@@ -309,12 +422,12 @@ namespace PosyanduProject
 
         private void BersihForm()
         {
-            if (txtIdImunisasi != null) txtIdImunisasi.Clear();
-            if (txtNoAntrean != null) txtNoAntrean.Clear();
-            if (txtStokInfo != null) txtStokInfo.Clear(); // Bersihkan juga kotak stok
-            if (cmbStatus != null) cmbStatus.SelectedIndex = 0;
+            // bindingSource.AddNew(); <-- HAPUS ATAU BERI GARIS MIRING PADA BARIS INI
 
-            // [KEMBALIKAN KE NOW] Sekarang jam akan muncul dengan benar tanpa menyebabkan crash
+            if (txtIdImunisasi != null) txtIdImunisasi.Clear(); // Tambahkan baris ini
+            if (txtNoAntrean != null) txtNoAntrean.Clear();
+            if (txtStokInfo != null) txtStokInfo.Clear();
+            if (cmbStatus != null) cmbStatus.SelectedIndex = 0;
             if (dtpSuntik != null) dtpSuntik.Value = DateTime.Now;
 
             if (cmbBalita != null) cmbBalita.SelectedIndex = -1;
@@ -323,7 +436,7 @@ namespace PosyanduProject
         }
     }
 
-    // [PENTING] Class pendukung untuk menyimpan ID di ComboBox
+    // [DIPERTAHANKAN] Class pendukung untuk menyimpan ID di ComboBox
     public class ComboItem
     {
         public int Id { get; }
