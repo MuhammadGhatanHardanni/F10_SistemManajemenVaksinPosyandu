@@ -61,6 +61,29 @@ namespace PosyanduProject
             catch (Exception ex) { MessageBox.Show("Gagal memuat data Orang Tua: " + ex.Message); }
         }
 
+        //LOAD DATA MENGGUNAKAN VIEW
+        private void LoadData()
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    string query = "SELECT * FROM vwBalitaPublic";
+                    using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
+                    {
+                        dtBalita = new DataTable();
+                        da.Fill(dtBalita);
+
+                        bindingSource.DataSource = dtBalita;
+                        if (dgvBalita != null) dgvBalita.DataSource = bindingSource;
+                    }
+                }
+
+                HitungTotal();
+            }
+            catch (Exception ex) { MessageBox.Show("Gagal memuat data: " + ex.Message); }
+        }
+
         // IMPLEMENTASI BINDING
         private void BindControls()
         {
@@ -78,6 +101,39 @@ namespace PosyanduProject
             {
                 txtNamaBalita.DataBindings.Clear();
                 txtNamaBalita.DataBindings.Add("Text", bindingSource, "Nama Balita");
+            }
+        }
+
+        private void HitungTotal()
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_CountBalita", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+
+                        SqlParameter outputParam = new SqlParameter("@Total", SqlDbType.Int);
+                        outputParam.Direction = ParameterDirection.Output;
+                        cmd.Parameters.Add(outputParam);
+
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+
+                        if (lblTotal != null)
+                        {
+                            lblTotal.Text = "Total Balita Terdaftar: " + outputParam.Value.ToString();
+                        }
+
+                        // Opsional: Tetap tampilkan di Title Bar
+                        this.Text = "Manajemen Balita | " + outputParam.Value.ToString() + " Data";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal menghitung total: " + ex.Message);
             }
         }
 
