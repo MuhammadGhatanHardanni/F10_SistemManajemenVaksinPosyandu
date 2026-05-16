@@ -9,6 +9,7 @@ namespace PosyanduProject
 {
     public partial class FormBalita : Form
     {
+        private BindingSource bindingSource = new BindingSource();
         private DataTable dtBalita = new DataTable();
 
         public FormBalita()
@@ -34,8 +35,14 @@ namespace PosyanduProject
                 cmbJenisKelamin.SelectedIndex = 0;
             }
 
+            if (bindingNavigator1 != null)
+            {
+                bindingNavigator1.BindingSource = bindingSource;
+            }
 
             LoadDataOrangTua();
+            LoadData();
+            BindControls();
         }
 
         private void LoadDataOrangTua()
@@ -54,6 +61,25 @@ namespace PosyanduProject
             catch (Exception ex) { MessageBox.Show("Gagal memuat data Orang Tua: " + ex.Message); }
         }
 
+        // IMPLEMENTASI BINDING
+        private void BindControls()
+        {
+            if (txtIdBalita != null)
+            {
+                txtIdBalita.DataBindings.Clear();
+                txtIdBalita.DataBindings.Add("Text", bindingSource, "ID");
+            }
+            if (txtNik != null)
+            {
+                txtNik.DataBindings.Clear();
+                txtNik.DataBindings.Add("Text", bindingSource, "NIK");
+            }
+            if (txtNamaBalita != null)
+            {
+                txtNamaBalita.DataBindings.Clear();
+                txtNamaBalita.DataBindings.Add("Text", bindingSource, "Nama Balita");
+            }
+        }
 
         // CRUD MENGGUNAKAN STORED PROCEDURE
         private void btnTambah_Click(object sender, EventArgs e)
@@ -182,7 +208,7 @@ namespace PosyanduProject
 
         private void dgvBalita_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            
+
         }
 
         private bool Validasi()
