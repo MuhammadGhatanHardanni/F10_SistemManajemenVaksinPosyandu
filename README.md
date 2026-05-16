@@ -1,7 +1,8 @@
 Screenshot Hasil Sistem Ketika Dijalankan
 
 Form koneksi
-<img width="541" height="339" alt="image" src="https://github.com/user-attachments/assets/c9b45235-fdb3-422f-be4c-7959ab6b89bc" />
+<img width="502" height="443" alt="image" src="https://github.com/user-attachments/assets/76667676-9577-454b-ba08-9e3182e74b10" />
+ditandai dengan muncul pada form login
 
 Form input data
 <img width="1919" height="1016" alt="image" src="https://github.com/user-attachments/assets/2101cc59-811e-4807-8398-8fa62ef2848a" />
