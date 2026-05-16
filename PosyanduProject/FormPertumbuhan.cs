@@ -2,15 +2,38 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Text.RegularExpressions; // Ditambahkan untuk validasi simbol
 using System.Windows.Forms;
 
 namespace PosyanduProject
 {
     public partial class FormPertumbuhan : Form
     {
+        // 1. Variabel Disconnected Architecture (Modul 8)
+        private BindingSource bindingSource = new BindingSource();
+        private DataTable dtPertumbuhan = new DataTable();
+
         public FormPertumbuhan()
         {
             InitializeComponent();
+
+            // 1. Menyambungkan event Load
+            this.Load += FormPertumbuhan_Load;
+
+            // 2. Menyambungkan kabel tombol-tombol CRUD
+            if (btnSimpan != null) btnSimpan.Click += btnSimpan_Click;
+            if (btnUpdate != null) btnUpdate.Click += btnUpdate_Click;
+            if (btnHapus != null) btnHapus.Click += btnHapus_Click;
+            if (btnBersih != null) btnBersih.Click += btnBersih_Click;
+
+            // 3. Menyambungkan kabel pencarian & klik tabel
+            if (btnCari != null) btnCari.Click += btnCari_Click;
+            if (dgvPertumbuhan != null) dgvPertumbuhan.CellClick += dgvPertumbuhan_CellClick;
+
+            // 4. [FITUR BARU] Menyambungkan validasi KeyPress ke kolom angka
+            if (txtBerat != null) txtBerat.KeyPress += txtAngkaDesimal_KeyPress;
+            if (txtTinggi != null) txtTinggi.KeyPress += txtAngkaDesimal_KeyPress;
+            if (txtLingkarKepala != null) txtLingkarKepala.KeyPress += txtAngkaDesimal_KeyPress;
         }
 
         private void FormPertumbuhan_Load(object sender, EventArgs e)
@@ -25,30 +48,48 @@ namespace PosyanduProject
                 dtpTimbang.MinDate = DateTime.Today.AddYears(-5);
             }
 
-            // [LOGIKA KEAMANAN] Sembunyikan fitur input jika yang login Orang Tua
+            // [LOGIKA KEAMANAN DIPERTAHANKAN] Sembunyikan fitur input jika yang login Orang Tua
             if (SessionManager.Role == "OrangTua")
             {
-                // Sembunyikan semua tombol
-                btnSimpan.Visible = btnUpdate.Visible = btnHapus.Visible = btnBersih.Visible = false;
+                if (btnSimpan != null) btnSimpan.Visible = false;
+                if (btnUpdate != null) btnUpdate.Visible = false;
+                if (btnHapus != null) btnHapus.Visible = false;
+                if (btnBersih != null) btnBersih.Visible = false;
 
-                // Sembunyikan semua input dan labelnya
-                cmbBalita.Visible = dtpTimbang.Visible = txtBerat.Visible = false;
-                txtTinggi.Visible = txtLingkarKepala.Visible = txtCatatan.Visible = false;
-                txtIdPertumbuhan.Visible = false;
+                if (cmbBalita != null) cmbBalita.Visible = false;
+                if (dtpTimbang != null) dtpTimbang.Visible = false;
+                if (txtBerat != null) txtBerat.Visible = false;
+                if (txtTinggi != null) txtTinggi.Visible = false;
+                if (txtLingkarKepala != null) txtLingkarKepala.Visible = false;
+                if (txtCatatan != null) txtCatatan.Visible = false;
+                if (txtIdPertumbuhan != null) txtIdPertumbuhan.Visible = false;
 
-                // Menyembunyikan semua label (lbl1 sampai lbl7)
-                lbl1.Visible = lbl2.Visible = lbl3.Visible = lbl4.Visible = false;
-                lbl5.Visible = lbl6.Visible = lbl7.Visible = false;
+                if (lbl1 != null) lbl1.Visible = false;
+                if (lbl2 != null) lbl2.Visible = false;
+                if (lbl3 != null) lbl3.Visible = false;
+                if (lbl4 != null) lbl4.Visible = false;
+                if (lbl5 != null) lbl5.Visible = false;
+                if (lbl6 != null) lbl6.Visible = false;
+                if (lbl7 != null) lbl7.Visible = false;
             }
 
+            // === PENGATURAN BINDING NAVIGATOR (Modul 8) ===
+            // Asumsi: Anda sudah menambahkan BindingNavigator di Designer
+            // if (bindingNavigator1 != null) bindingNavigator1.BindingSource = bindingSource;
+
+            bindingSource.CurrentChanged += bindingSource_CurrentChanged;
+            // ==============================================
+
             LoadComboBoxBalita();
-            TampilkanData();
+            LoadData(); // Memanggil VIEW (Modul 9)
+            BindControls(); // Menghubungkan TextBox dengan BindingSource
         }
 
         private void LoadComboBoxBalita()
         {
             try
             {
+                if (cmbBalita == null) return;
                 cmbBalita.Items.Clear();
                 var dt = DatabaseHelper.GetDataTable("SELECT id_balita, nama_balita FROM Balita ORDER BY nama_balita");
                 foreach (DataRow r in dt.Rows)
@@ -59,34 +100,93 @@ namespace PosyanduProject
             catch (Exception ex) { MessageBox.Show("Gagal memuat Balita: " + ex.Message); }
         }
 
-        private void TampilkanData(string filter = "")
+        private void LoadData()
         {
-            string sql = @"SELECT cp.id_pertumbuhan AS [ID], 
-                                  b.nama_balita AS [Nama Balita], 
-                                  CONVERT(varchar, cp.tgl_timbang, 106) AS [Tgl Timbang], 
-                                  cp.berat_badan AS [Berat (kg)], 
-                                  cp.tinggi_badan AS [Tinggi (cm)], 
-                                  cp.lingkar_kepala AS [Lingkar Kepala],
-                                  cp.catatan_tambahan AS [Catatan]
-                           FROM Catatan_Pertumbuhan cp
-                           JOIN Balita b ON cp.id_balita = b.id_balita";
-
             try
             {
-                DataTable dt;
-                if (!string.IsNullOrEmpty(filter))
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
                 {
-                    sql += " WHERE b.nama_balita LIKE @f ORDER BY cp.tgl_timbang DESC";
-                    dt = DatabaseHelper.GetDataTable(sql, new SqlParameter("@f", "%" + filter.Trim() + "%"));
+                    string query = "SELECT * FROM vwPertumbuhanPublic";
+                    using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
+                    {
+                        dtPertumbuhan = new DataTable();
+                        da.Fill(dtPertumbuhan);
+
+                        // 1. Masukkan data ke BindingSource
+                        bindingSource.DataSource = dtPertumbuhan;
+
+                        // 2. Sambungkan ke Tabel (DataGridView)
+                        if (dgvPertumbuhan != null) dgvPertumbuhan.DataSource = bindingSource;
+
+                        // 3. [TAMBAHKAN BARIS INI] Paksa Navigator untuk membaca data yang sama!
+                        if (bindingNavigator1 != null) bindingNavigator1.BindingSource = bindingSource;
+                    }
                 }
-                else
-                {
-                    sql += " ORDER BY cp.tgl_timbang DESC";
-                    dt = DatabaseHelper.GetDataTable(sql);
-                }
-                dgvPertumbuhan.DataSource = dt;
+
+                HitungTotal(); // Panggil SP Count
             }
-            catch (Exception ex) { MessageBox.Show("Error Tampil Data: " + ex.Message); }
+            catch (Exception ex) { MessageBox.Show("Gagal memuat data: " + ex.Message); }
+        }
+
+        private void BindControls()
+        {
+            if (txtIdPertumbuhan != null) { txtIdPertumbuhan.DataBindings.Clear(); txtIdPertumbuhan.DataBindings.Add("Text", bindingSource, "ID"); }
+            if (txtBerat != null) { txtBerat.DataBindings.Clear(); txtBerat.DataBindings.Add("Text", bindingSource, "Berat (kg)"); }
+            if (txtTinggi != null) { txtTinggi.DataBindings.Clear(); txtTinggi.DataBindings.Add("Text", bindingSource, "Tinggi (cm)"); }
+            if (txtLingkarKepala != null) { txtLingkarKepala.DataBindings.Clear(); txtLingkarKepala.DataBindings.Add("Text", bindingSource, "Lingkar Kepala"); }
+            if (txtCatatan != null) { txtCatatan.DataBindings.Clear(); txtCatatan.DataBindings.Add("Text", bindingSource, "Catatan"); }
+        }
+
+        private void bindingSource_CurrentChanged(object sender, EventArgs e)
+        {
+            if (bindingSource.Current == null) return;
+
+            DataRowView rowView = (DataRowView)bindingSource.Current;
+
+            if (txtIdPertumbuhan != null) txtIdPertumbuhan.Text = rowView["ID"].ToString();
+
+            string tglStr = rowView["Tgl Timbang"].ToString();
+            if (DateTime.TryParseExact(tglStr, "dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime tglExact))
+            {
+                if (dtpTimbang != null) dtpTimbang.Value = tglExact;
+            }
+            else if (DateTime.TryParse(tglStr, out DateTime tglFallback))
+            {
+                if (dtpTimbang != null) dtpTimbang.Value = tglFallback;
+            }
+
+            if (cmbBalita != null)
+            {
+                string namaBlt = rowView["Nama Balita"].ToString();
+                foreach (ComboItem item in cmbBalita.Items)
+                {
+                    if (item.Teks == namaBlt) { cmbBalita.SelectedItem = item; break; }
+                }
+            }
+        }
+
+        private void HitungTotal()
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_CountPertumbuhan", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        SqlParameter outputParam = new SqlParameter("@Total", SqlDbType.Int);
+                        outputParam.Direction = ParameterDirection.Output;
+                        cmd.Parameters.Add(outputParam);
+
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+
+                        lblTotal.Text = "Total Catatan Pertumbuhan: " + outputParam.Value.ToString();
+                        this.Text = "Manajemen Pertumbuhan Balita | " + outputParam.Value.ToString() + " Catatan Data";
+                    }
+                }
+            }
+            catch (Exception ex) { MessageBox.Show("Gagal menghitung total: " + ex.Message); }
         }
 
         private void btnSimpan_Click(object sender, EventArgs e)
@@ -96,95 +196,172 @@ namespace PosyanduProject
             var blt = (ComboItem)cmbBalita.SelectedItem;
             try
             {
-                string sql = @"INSERT INTO Catatan_Pertumbuhan (id_balita, id_petugas, tgl_timbang, berat_badan, tinggi_badan, lingkar_kepala, catatan_tambahan) 
-                               VALUES (@b, @p, @tgl, @berat, @tinggi, @lk, @ctt)";
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_InsertPertumbuhan", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@id_balita", blt.Id);
+                        cmd.Parameters.AddWithValue("@id_petugas", SessionManager.IdUser > 0 ? SessionManager.IdUser : 1);
+                        cmd.Parameters.AddWithValue("@tgl", dtpTimbang.Value.Date);
+                        cmd.Parameters.AddWithValue("@berat", ParseDecimal(txtBerat.Text));
+                        cmd.Parameters.AddWithValue("@tinggi", ParseDecimal(txtTinggi.Text));
+                        cmd.Parameters.AddWithValue("@lk", ParseDecimal(txtLingkarKepala.Text));
+                        cmd.Parameters.AddWithValue("@catatan", txtCatatan.Text.Trim());
 
-                DatabaseHelper.ExecuteNonQuery(sql,
-                    new SqlParameter("@b", blt.Id),
-                    new SqlParameter("@p", SessionManager.IdUser > 0 ? SessionManager.IdUser : 1),
-                    new SqlParameter("@tgl", dtpTimbang.Value.Date),
-                    new SqlParameter("@berat", ParseDecimal(txtBerat.Text)),
-                    new SqlParameter("@tinggi", ParseDecimal(txtTinggi.Text)),
-                    new SqlParameter("@lk", ParseDecimal(txtLingkarKepala.Text)),
-                    new SqlParameter("@ctt", txtCatatan.Text.Trim())
-                );
-
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
                 MessageBox.Show("✅ Catatan pertumbuhan berhasil disimpan!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 BersihForm();
-                TampilkanData();
+                LoadData();
             }
             catch (Exception ex) { MessageBox.Show("Gagal Simpan: " + ex.Message); }
         }
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtIdPertumbuhan.Text)) { MessageBox.Show("Pilih data dulu di tabel!"); return; }
+            if (string.IsNullOrWhiteSpace(txtIdPertumbuhan.Text)) { MessageBox.Show("Pilih data dulu di tabel!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
             if (!Validasi()) return;
 
             try
             {
-                string sql = @"UPDATE Catatan_Pertumbuhan 
-                               SET tgl_timbang=@tgl, berat_badan=@berat, tinggi_badan=@tinggi, lingkar_kepala=@lk, catatan_tambahan=@ctt 
-                               WHERE id_pertumbuhan=@id";
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_UpdatePertumbuhan", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@id", int.Parse(txtIdPertumbuhan.Text));
+                        cmd.Parameters.AddWithValue("@tgl", dtpTimbang.Value.Date);
+                        cmd.Parameters.AddWithValue("@berat", ParseDecimal(txtBerat.Text));
+                        cmd.Parameters.AddWithValue("@tinggi", ParseDecimal(txtTinggi.Text));
+                        cmd.Parameters.AddWithValue("@lk", ParseDecimal(txtLingkarKepala.Text));
+                        cmd.Parameters.AddWithValue("@catatan", txtCatatan.Text.Trim());
 
-                DatabaseHelper.ExecuteNonQuery(sql,
-                    new SqlParameter("@tgl", dtpTimbang.Value.Date),
-                    new SqlParameter("@berat", ParseDecimal(txtBerat.Text)),
-                    new SqlParameter("@tinggi", ParseDecimal(txtTinggi.Text)),
-                    new SqlParameter("@lk", ParseDecimal(txtLingkarKepala.Text)),
-                    new SqlParameter("@ctt", txtCatatan.Text.Trim()),
-                    new SqlParameter("@id", int.Parse(txtIdPertumbuhan.Text))
-                );
-
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
                 MessageBox.Show("✅ Data berhasil diperbarui!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                BersihForm();
-                TampilkanData();
+                LoadData();
             }
             catch (Exception ex) { MessageBox.Show("Gagal Update: " + ex.Message); }
         }
 
         private void btnHapus_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtIdPertumbuhan.Text)) { MessageBox.Show("Pilih data dulu di tabel!"); return; }
-            if (MessageBox.Show("Yakin ingin menghapus data ini?", "Hapus", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+            if (string.IsNullOrWhiteSpace(txtIdPertumbuhan.Text)) { MessageBox.Show("Pilih data dulu di tabel!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+            if (MessageBox.Show("Yakin ingin menghapus catatan pertumbuhan ini?", "Hapus", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
 
             try
             {
-                DatabaseHelper.ExecuteNonQuery("DELETE FROM Catatan_Pertumbuhan WHERE id_pertumbuhan=@id",
-                    new SqlParameter("@id", int.Parse(txtIdPertumbuhan.Text)));
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_DeletePertumbuhan", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@id", int.Parse(txtIdPertumbuhan.Text));
 
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
                 MessageBox.Show("✅ Data berhasil dihapus!");
                 BersihForm();
-                TampilkanData();
+                LoadData();
             }
             catch (Exception ex) { MessageBox.Show("Gagal Hapus: " + ex.Message); }
         }
 
-        private void dgvPertumbuhan_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void btnCari_Click(object sender, EventArgs e)
         {
-            if (e.RowIndex < 0) return;
-            var row = dgvPertumbuhan.Rows[e.RowIndex];
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_SearchPertumbuhan", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@keyword", txtCari.Text.Trim());
 
-            txtIdPertumbuhan.Text = row.Cells["ID"].Value?.ToString() ?? "";
-            txtBerat.Text = row.Cells["Berat (kg)"].Value?.ToString() ?? "";
-            txtTinggi.Text = row.Cells["Tinggi (cm)"].Value?.ToString() ?? "";
-            txtLingkarKepala.Text = row.Cells["Lingkar Kepala"].Value?.ToString() ?? "";
-            txtCatatan.Text = row.Cells["Catatan"].Value?.ToString() ?? "";
-
-            string tglStr = row.Cells["Tgl Timbang"].Value?.ToString() ?? "";
-            if (DateTime.TryParse(tglStr, out DateTime tgl)) dtpTimbang.Value = tgl;
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            dtPertumbuhan = new DataTable();
+                            da.Fill(dtPertumbuhan);
+                            bindingSource.DataSource = dtPertumbuhan;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex) { MessageBox.Show("Gagal mencari data: " + ex.Message); }
         }
 
-        private void btnCari_Click(object sender, EventArgs e) => TampilkanData(txtCari.Text);
         private void btnBersih_Click(object sender, EventArgs e) => BersihForm();
 
+        private void dgvPertumbuhan_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Dikosongkan
+        }
+
+        // ==========================================
+        // FITUR BARU: LOGIKA VALIDASI INPUT
+        // ==========================================
+
+        // Memblokir huruf dan simbol (kecuali koma dan titik) secara real-time
+        private void txtAngkaDesimal_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Mengizinkan angka, tombol backspace, koma (,), dan titik (.)
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != '.' && e.KeyChar != ',')
+            {
+                e.Handled = true; // Memblokir huruf
+            }
+
+            // Mencegah pengetikan lebih dari satu koma atau titik
+            TextBox txt = sender as TextBox;
+            if ((e.KeyChar == '.' || e.KeyChar == ',') && (txt.Text.Contains(".") || txt.Text.Contains(",")))
+            {
+                e.Handled = true;
+            }
+        }
+
+        // Validasi saat tombol Simpan/Update ditekan
         private bool Validasi()
         {
-            if (cmbBalita.SelectedItem == null) { MessageBox.Show("Pilih balita!"); return false; }
-            if (string.IsNullOrWhiteSpace(txtBerat.Text) || string.IsNullOrWhiteSpace(txtTinggi.Text))
+            if (cmbBalita.SelectedItem == null)
             {
-                MessageBox.Show("Berat dan Tinggi badan wajib diisi!"); return false;
+                MessageBox.Show("Harap pilih data Balita terlebih dahulu!", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
             }
+
+            if (string.IsNullOrWhiteSpace(txtBerat.Text) || ParseDecimal(txtBerat.Text) <= 0)
+            {
+                MessageBox.Show("Berat badan wajib diisi dengan angka lebih dari 0!", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtBerat.Focus();
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtTinggi.Text) || ParseDecimal(txtTinggi.Text) <= 0)
+            {
+                MessageBox.Show("Tinggi badan wajib diisi dengan angka lebih dari 0!", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtTinggi.Focus();
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(txtLingkarKepala.Text) && ParseDecimal(txtLingkarKepala.Text) <= 0)
+            {
+                MessageBox.Show("Jika lingkar kepala diisi, nilainya harus berupa angka lebih dari 0!", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtLingkarKepala.Focus();
+                return false;
+            }
+
+            if (Regex.IsMatch(txtCatatan.Text, @"[<>^*%]"))
+            {
+                MessageBox.Show("Catatan tidak boleh mengandung simbol berbahaya (<, >, ^, *, %)!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtCatatan.Focus();
+                return false;
+            }
+
             return true;
         }
 
@@ -197,13 +374,24 @@ namespace PosyanduProject
 
         private void BersihForm()
         {
-            txtIdPertumbuhan.Clear();
-            txtBerat.Clear();
-            txtTinggi.Clear();
-            txtLingkarKepala.Clear();
-            txtCatatan.Clear();
-            cmbBalita.SelectedIndex = -1;
-            dtpTimbang.Value = DateTime.Today;
+            if (txtIdPertumbuhan != null) txtIdPertumbuhan.Clear();
+            if (txtBerat != null) txtBerat.Clear();
+            if (txtTinggi != null) txtTinggi.Clear();
+            if (txtLingkarKepala != null) txtLingkarKepala.Clear();
+            if (txtCatatan != null) txtCatatan.Clear();
+            if (txtCari != null) txtCari.Clear();
+            if (cmbBalita != null) cmbBalita.SelectedIndex = -1;
+            if (dtpTimbang != null) dtpTimbang.Value = DateTime.Today;
         }
     }
+
+    /*
+    public class ComboItem
+    {
+        public int Id { get; }
+        public string Teks { get; }
+        public ComboItem(int id, string teks) { Id = id; Teks = teks; }
+        public override string ToString() => Teks;
+    }
+    */
 }
