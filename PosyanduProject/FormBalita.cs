@@ -84,7 +84,7 @@ namespace PosyanduProject
             catch (Exception ex) { MessageBox.Show("Gagal memuat data: " + ex.Message); }
         }
 
-        // IMPLEMENTASI BINDING
+        // IMPLEMENTASI BINDING (SUDAH DI-UPDATE)
         private void BindControls()
         {
             if (txtIdBalita != null)
@@ -101,6 +101,20 @@ namespace PosyanduProject
             {
                 txtNamaBalita.DataBindings.Clear();
                 txtNamaBalita.DataBindings.Add("Text", bindingSource, "Nama Balita");
+            }
+
+            // [UPDATE] Binding untuk ComboBox Nama Orang Tua
+            if (cmbOrangTua != null)
+            {
+                cmbOrangTua.DataBindings.Clear();
+                cmbOrangTua.DataBindings.Add("Text", bindingSource, "Nama Ortu");
+            }
+
+            // [UPDATE] Binding untuk DateTimePicker Tanggal Lahir
+            if (dtpLahir != null)
+            {
+                dtpLahir.DataBindings.Clear();
+                dtpLahir.DataBindings.Add("Text", bindingSource, "Tgl Lahir");
             }
         }
 
@@ -262,9 +276,26 @@ namespace PosyanduProject
         private void txtCari_KeyDown(object sender, KeyEventArgs e) { if (e.KeyCode == Keys.Enter) btnCari_Click(sender, e); }
         private void btnBersih_Click(object sender, EventArgs e) => BersihForm();
 
+        // [UPDATE] MENGATUR COMBOBOX JENIS KELAMIN SAAT TABEL DIKLIK
         private void dgvBalita_CellClick(object sender, DataGridViewCellEventArgs e)
         {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dgvBalita.Rows[e.RowIndex];
 
+                if (row.Cells["L/P"].Value != null)
+                {
+                    string jenisKelamin = row.Cells["L/P"].Value.ToString();
+                    if (jenisKelamin == "L")
+                    {
+                        cmbJenisKelamin.SelectedIndex = 0;
+                    }
+                    else if (jenisKelamin == "P")
+                    {
+                        cmbJenisKelamin.SelectedIndex = 1;
+                    }
+                }
+            }
         }
 
         private bool Validasi()
