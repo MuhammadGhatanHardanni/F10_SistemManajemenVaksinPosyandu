@@ -7,11 +7,17 @@ namespace PosyanduProject
     public static class DatabaseHelper
     {
         private const string _connectionString =
-            @"Server=LAPTOP-VL5SDNPR\GHATANHARDANNI;Database=PosyanduVaksinProject;Integrated Security=True;";
+            @"Server=LAPTOP-VL5SDNPR\GHATANHARDANNI;Database=SistemManajemenPosyandu;Integrated Security=True;";
 
         public static SqlConnection GetConnection()
         {
             return new SqlConnection(_connectionString);
+        }
+
+        // [TAMBAHAN] Fungsi ini dibutuhkan oleh form-form yang menggunakan Disconnected Architecture (DataAdapter)
+        public static string GetConnectionString()
+        {
+            return _connectionString;
         }
 
         public static bool TestConnection(out string pesan)
@@ -78,7 +84,7 @@ namespace PosyanduProject
                 using (SqlDataAdapter da = new SqlDataAdapter(sql, conn))
                 {
                     if (parameters != null)
-                        da.SelectCommand.Parameters.AddRange(parameters); // Diperbarui agar konsisten
+                        da.SelectCommand.Parameters.AddRange(parameters);
                     da.Fill(dt);
                 }
             }
