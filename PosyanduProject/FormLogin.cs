@@ -92,7 +92,22 @@ namespace PosyanduProject
         }
 
         // Event ketika CheckBox Show Password di klik/berubah
-        
+        private void chkShowPassword_CheckedChanged(object sender, EventArgs e)
+        {
+            if (txtPassword != null)
+            {
+                if (chkShowPassword.Checked)
+                {
+                    // Tampilkan tulisan asli (buka topeng sistem & topeng cadangan)
+                    txtPassword.UseSystemPasswordChar = false;
+                    txtPassword.PasswordChar = '\0'; // \0 artinya karakter kosong/dihapus
+                }
+                else
+                {
+                    txtPassword.UseSystemPasswordChar = true;
+                }
+            }
+        }
 
         private void linkDaftar_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
