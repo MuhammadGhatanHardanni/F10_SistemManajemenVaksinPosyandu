@@ -9,7 +9,8 @@ namespace PosyanduProject
 {
     public partial class FormVaksin : Form
     {
-        
+        private BindingSource bindingSource = new BindingSource();
+        private DataTable dtVaksin = new DataTable();
 
         public FormVaksin()
         {
@@ -29,10 +30,19 @@ namespace PosyanduProject
                 dtpKedaluwarsa.MaxDate = DateTime.Today.AddYears(10);
             }
 
-            
+            // BINDING NAVIGATOR
+            if (bindingNavigator1 != null)
+            {
+                bindingNavigator1.BindingSource = bindingSource;
+            }
+            bindingSource.CurrentChanged += bindingSource_CurrentChanged;
+
+            LoadData();
+            BindControls();
         }
 
-       
+        // LOAD DATA MENGGUNAKAN VIEW 
+        
 
         private void FormatGrid()
         {
@@ -51,7 +61,40 @@ namespace PosyanduProject
             }
         }
 
-        
+        // IMPLEMENTASI BINDING
+        private void BindControls()
+        {
+            txtIdVaksin.DataBindings.Clear();
+            txtNamaVaksin.DataBindings.Clear();
+            txtStok.DataBindings.Clear();
+            txtDeskripsi.DataBindings.Clear();
+
+            // Binding harus sesuai dengan nama kolom (alias) di VIEW vwVaksinPublic
+            txtIdVaksin.DataBindings.Add("Text", bindingSource, "ID");
+            txtNamaVaksin.DataBindings.Add("Text", bindingSource, "Vaksin");
+            txtStok.DataBindings.Add("Text", bindingSource, "Stok");
+            txtDeskripsi.DataBindings.Add("Text", bindingSource, "Deskripsi");
+        }
+
+        private void bindingSource_CurrentChanged(object sender, EventArgs e)
+        {
+            if (bindingSource.Current == null) return;
+
+            DataRowView rowView = (DataRowView)bindingSource.Current;
+
+            // Mengisi ID agar validasi Update/Hapus berjalan lancar
+            txtIdVaksin.Text = rowView["ID"].ToString();
+
+            // Update Tanggal Kedaluwarsa secara manual
+            string tglStr = rowView["Tgl Expired"].ToString();
+            if (DateTime.TryParse(tglStr, out DateTime tgl))
+            {
+                if (dtpKedaluwarsa != null) dtpKedaluwarsa.Value = tgl;
+            }
+        }
+
+        // SP COUNT 
+
 
         // 5. CRUD MENGGUNAKAN STORED PROCEDURE
         private void btnTambah_Click(object sender, EventArgs e)
@@ -162,7 +205,7 @@ namespace PosyanduProject
                         }
                     }
                 }
-                FormatGrid(); 
+                FormatGrid();
             }
             catch (Exception ex) { MessageBox.Show("Gagal mencari data: " + ex.Message); }
         }
@@ -236,11 +279,11 @@ namespace PosyanduProject
         private void txtNamaVaksin_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (!char.IsControl(e.KeyChar) &&
-                !char.IsLetterOrDigit(e.KeyChar) && 
+                !char.IsLetterOrDigit(e.KeyChar) &&
                 !char.IsWhiteSpace(e.KeyChar) &&
                 e.KeyChar != '-')
             {
-                e.Handled = true; 
+                e.Handled = true;
             }
         }
     }
