@@ -111,11 +111,20 @@ namespace PosyanduProject
 
         private void btnLogout_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Apakah Anda yakin ingin keluar?", "Konfirmasi",
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            DialogResult konfirmasi = MessageBox.Show("Apakah Anda yakin ingin keluar dari aplikasi?", "Konfirmasi Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (konfirmasi == DialogResult.Yes)
             {
-                SessionManager.Clear();
-                this.Close(); // Menutup FormMain dan kembali ke FormLogin (tergantung logika Program.cs)
+                // 1. Bersihkan data sesi (Session) agar akun lama benar-benar keluar
+                SessionManager.IdUser = 0;
+                SessionManager.Role = "";
+
+                // 2. Panggil dan tampilkan kembali Form Login
+                FormLogin formLogin = new FormLogin();
+                formLogin.Show();
+
+                // 3. Sembunyikan FormMain (Dashboard) ini
+                this.Hide();
             }
         }
     }
