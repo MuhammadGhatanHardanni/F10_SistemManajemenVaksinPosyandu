@@ -42,7 +42,29 @@ namespace PosyanduProject
         }
 
         // LOAD DATA MENGGUNAKAN VIEW 
-        
+        private void LoadData()
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    // Mengambil data dari VIEW
+                    string query = "SELECT * FROM vwVaksinPublic";
+                    using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
+                    {
+                        dtVaksin = new DataTable();
+                        da.Fill(dtVaksin);
+
+                        bindingSource.DataSource = dtVaksin;
+                        if (dgvVaksin != null) dgvVaksin.DataSource = bindingSource;
+                    }
+                }
+
+                FormatGrid(); // Warnai stok yang mau habis
+                HitungTotal(); // Panggil SP Count
+            }
+            catch (Exception ex) { MessageBox.Show("Gagal memuat data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+        }
 
         private void FormatGrid()
         {
@@ -94,7 +116,33 @@ namespace PosyanduProject
         }
 
         // SP COUNT 
+        private void HitungTotal()
+        {
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    using (SqlCommand cmd = new SqlCommand("sp_CountVaksin", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
 
+                        SqlParameter outputParam = new SqlParameter("@Total", SqlDbType.Int);
+                        outputParam.Direction = ParameterDirection.Output;
+                        cmd.Parameters.Add(outputParam);
+
+                        conn.Open();
+                        cmd.ExecuteNonQuery();
+
+                        if (lblTotal != null)
+                        {
+                            lblTotal.Text = "Total Jenis Vaksin: " + outputParam.Value.ToString();
+                        }
+                        this.Text = "Manajemen Vaksin | " + outputParam.Value.ToString() + " Jenis Vaksin";
+                    }
+                }
+            }
+            catch (Exception ex) { MessageBox.Show("Gagal menghitung total: " + ex.Message); }
+        }
 
         // 5. CRUD MENGGUNAKAN STORED PROCEDURE
         private void btnTambah_Click(object sender, EventArgs e)
