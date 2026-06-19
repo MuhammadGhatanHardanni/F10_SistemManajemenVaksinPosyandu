@@ -62,7 +62,13 @@ namespace PosyanduProject
                 FormatGrid(); // Warnai stok yang mau habis
                 HitungTotal(); // Panggil SP Count
             }
-            catch (Exception ex) { MessageBox.Show("Gagal memuat data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal memuat data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormVaksin (Load Data): " + ex.Message);
+            }
         }
 
         private void FormatGrid()
@@ -140,10 +146,16 @@ namespace PosyanduProject
                     }
                 }
             }
-            catch (Exception ex) { MessageBox.Show("Gagal menghitung total: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal menghitung total: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormVaksin (Hitung Total): " + ex.Message);
+            }
         }
 
-        // 5. CRUD MENGGUNAKAN STORED PROCEDURE
+        // CRUD MENGGUNAKAN STORED PROCEDURE
         private void btnTambah_Click(object sender, EventArgs e)
         {
             if (!ValidasiInput()) return;
@@ -168,7 +180,13 @@ namespace PosyanduProject
                 BersihkanForm();
                 LoadData();
             }
-            catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormVaksin (Tambah): " + ex.Message);
+            }
         }
 
         private void btnUpdate_Click(object sender, EventArgs e)
@@ -201,7 +219,13 @@ namespace PosyanduProject
                 BersihkanForm();
                 LoadData();
             }
-            catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormVaksin (Update): " + ex.Message);
+            }
         }
 
         private void btnHapus_Click(object sender, EventArgs e)
@@ -230,6 +254,9 @@ namespace PosyanduProject
             {
                 if (ex.Number == 547) MessageBox.Show("Vaksin sedang digunakan di data imunisasi, tidak bisa dihapus!", "Akses Ditolak", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 else MessageBox.Show("Error: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormVaksin (Hapus): " + ex.Message);
             }
         }
 
@@ -254,7 +281,13 @@ namespace PosyanduProject
                 }
                 FormatGrid();
             }
-            catch (Exception ex) { MessageBox.Show("Gagal mencari data: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal mencari data: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormVaksin (Cari): " + ex.Message);
+            }
         }
 
         private void btnTampilkan_Click(object sender, EventArgs e) { txtCari.Clear(); LoadData(); }
@@ -296,14 +329,6 @@ namespace PosyanduProject
                 MessageBox.Show("Nama vaksin tidak boleh mengandung simbol khusus (@, #, $, dll)!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtNamaVaksin.Focus();
                 return false;
-            if (string.IsNullOrWhiteSpace(txtNamaVaksin.Text))
-            {
-                MessageBox.Show("Nama vaksin tidak boleh kosong!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false;
-            }
-
-            if (Regex.IsMatch(txtNamaVaksin.Text, @"[@#$%^&*<>]"))
-            {
-                MessageBox.Show("Nama vaksin tidak boleh mengandung simbol khusus (@, #, $, dll)!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false;            
             }
 
             if (string.IsNullOrWhiteSpace(txtStok.Text) || !int.TryParse(txtStok.Text, out int stok) || stok < 0)
@@ -311,7 +336,6 @@ namespace PosyanduProject
                 MessageBox.Show("Stok harus berupa angka positif!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtStok.Focus();
                 return false;
-            }
             }
 
             if (dtpKedaluwarsa != null)
@@ -349,28 +373,15 @@ namespace PosyanduProject
             if (dtpKedaluwarsa != null) dtpKedaluwarsa.Value = DateTime.Today.AddMonths(6);
         }
 
+        // Sesuai kesepakatan, KeyPress dibebaskan agar tidak kaku, pertahanan dijaga penuh oleh ValidasiInput (Regex)
         private void txtStok_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar)) e.Handled = true;
+
         }
 
         private void txtNamaVaksin_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (!char.IsControl(e.KeyChar) &&
-                !char.IsLetterOrDigit(e.KeyChar) &&
-                !char.IsWhiteSpace(e.KeyChar) &&
-                e.KeyChar != '-')
-            {
-                e.Handled = true;
-            }
-            
-            if (!char.IsControl(e.KeyChar) &&
-                !char.IsLetterOrDigit(e.KeyChar) &&
-                !char.IsWhiteSpace(e.KeyChar) &&
-                e.KeyChar != '-')
-            {
-                e.Handled = true;
-            }
+
         }
     }
 }
