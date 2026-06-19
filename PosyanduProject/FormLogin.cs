@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Data.SqlClient;
 using System.Windows.Forms;
 
 namespace PosyanduProject
@@ -31,22 +32,18 @@ namespace PosyanduProject
 
             try
             {
+                // [UCP 3] Menggunakan Parameterized Query untuk mencegah SQL Injection
+                string sql = "SELECT id_user, nama_lengkap, username, role FROM Users WHERE username = @user AND password = @pass";
 
-                string username = txtUsername.Text.Trim();
-                string password = txtPassword.Text.Trim();
-
-                // Menggabungkan string secara langsung
-                string sql = "SELECT id_user, nama_lengkap, username, role " +
-                             "FROM Users " +
-                             "WHERE username = '" + username + "' AND password = '" + password + "'";
-
-                DataTable dt = DatabaseHelper.GetDataTable(sql);
+                DataTable dt = DatabaseHelper.GetDataTable(sql,
+                    new SqlParameter("@user", txtUsername.Text.Trim()),
+                    new SqlParameter("@pass", txtPassword.Text.Trim())
+                );
 
                 if (dt.Rows.Count > 0)
                 {
                     DataRow row = dt.Rows[0];
 
-                    // Menyimpan data ke SessionManager
                     SessionManager.IdUser = Convert.ToInt32(row["id_user"]);
                     SessionManager.NamaLengkap = row["nama_lengkap"].ToString();
                     SessionManager.Username = row["username"].ToString();
@@ -63,11 +60,17 @@ namespace PosyanduProject
                     lblError.Text = "✗ Username atau password salah.";
                     txtPassword.Clear();
                     txtPassword.Focus();
+
+                    // [TAMBAHAN UCP 3] Log kegagalan login
+                    DatabaseHelper.CatatLogError("Login Gagal: Username atau Password salah untuk user: " + txtUsername.Text);
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error koneksi database:\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormLogin (Koneksi Database): " + ex.Message);
             }
         }
 
@@ -76,8 +79,8 @@ namespace PosyanduProject
         {
             if (e.KeyCode == Keys.Enter)
             {
-                e.SuppressKeyPress = true; // Menghilangkan bunyi "ding" pada Windows
-                btnLogin_Click(sender, e); // Memanggil tombol login
+                e.SuppressKeyPress = true;
+                btnLogin_Click(sender, e);
             }
         }
 
@@ -87,20 +90,19 @@ namespace PosyanduProject
             if (e.KeyCode == Keys.Enter)
             {
                 e.SuppressKeyPress = true;
-                txtPassword.Focus(); // Pindah ke kolom password jika tekan enter di username
+                txtPassword.Focus();
             }
         }
 
-        // Event ketika CheckBox Show Password di klik/berubah
+        // Event ketika CheckBox Show Password di klik
         private void chkShowPassword_CheckedChanged(object sender, EventArgs e)
         {
             if (txtPassword != null)
             {
                 if (chkShowPassword.Checked)
                 {
-                    // Tampilkan tulisan asli (buka topeng sistem & topeng cadangan)
                     txtPassword.UseSystemPasswordChar = false;
-                    txtPassword.PasswordChar = '\0'; // \0 artinya karakter kosong/dihapus
+                    txtPassword.PasswordChar = '\0';
                 }
                 else
                 {
