@@ -6,21 +6,10 @@ namespace PosyanduProject
 {
     public static class DatabaseHelper
     {
-        // ======================================================================================
-        // [PERSIAPAN UCP 3 - CLIENT SERVER] 
-        // Jika besok aplikasi dijalankan di laptop teman, matikan (comment) connection string 
-        // yang atas, lalu hidupkan connection string yang bawah. Ganti IP dan Password-nya!
-        // ======================================================================================
 
         // 1. Connection String Lokal (Dipakai saat di laptop Anda sendiri)
         private const string _connectionString =
             @"Server=LAPTOP-VL5SDNPR\GHATANHARDANNI;Database=SistemManajemenPosyandu;Integrated Security=True;";
-
-        // 2. Connection String Jaringan / Client-Server (Dipakai saat di-install di laptop teman)
-        // private const string _connectionString = 
-        //    @"Data Source=192.168.x.x; Initial Catalog=SistemManajemenPosyandu; User ID=sa; Password=PasswordSQLAnda;";
-
-        // ======================================================================================
 
         public static SqlConnection GetConnection()
         {
@@ -105,11 +94,6 @@ namespace PosyanduProject
             }
             return dt;
         }
-
-        // ==============================================================
-        // [FITUR BARU UCP 3] FUNGSI PENCATAT ERROR KE DATABASE (LOGGING)
-        // Sesuai dengan Modul Praktikum - Error Handling & Logging
-        // ==============================================================
         public static void CatatLogError(string pesanError)
         {
             try
