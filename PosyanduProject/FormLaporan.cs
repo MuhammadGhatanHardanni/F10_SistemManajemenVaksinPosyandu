@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting; // [TAMBAHAN UCP 3] Library wajib untuk Grafik
 
 namespace PosyanduProject
 {
@@ -67,6 +68,9 @@ namespace PosyanduProject
             if (cmbTahun != null) cmbTahun.Visible = false;
             if (labelBulan != null) labelBulan.Visible = false;
             if (labelTahun != null) labelTahun.Visible = false;
+
+            // Sembunyikan grafik jika yang login orang tua (karena orang tua hanya melihat riwayat anak)
+            if (chartVaksin != null) chartVaksin.Visible = false;
         }
 
         // ==============================================================
@@ -104,6 +108,12 @@ namespace PosyanduProject
 
                 if (lblStatusLaporan != null)
                     lblStatusLaporan.Text = $"Mode: Rekap Stok | Total Jenis Vaksin: {dtLaporan.Rows.Count}";
+
+                // [FITUR UCP 3] Panggil fungsi render grafik setelah data tabel dimuat
+                LoadGrafikVaksin();
+
+                // Pastikan grafik terlihat
+                if (chartVaksin != null) chartVaksin.Visible = true;
             }
             catch (Exception ex)
             {
@@ -111,6 +121,51 @@ namespace PosyanduProject
 
                 // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormLaporan (Load Laporan Stok): " + ex.Message);
+            }
+        }
+
+        // ==============================================================
+        // [FITUR UCP 3] DASHBOARD GRAFIK KETERSEDIAAN STOK VAKSIN
+        // ==============================================================
+        private void LoadGrafikVaksin()
+        {
+            try
+            {
+                if (chartVaksin == null) return;
+
+                // 1. Bersihkan grafik lama agar tidak menumpuk saat di-refresh
+                chartVaksin.Series.Clear();
+                chartVaksin.Titles.Clear();
+
+                // 2. Tambahkan Judul Grafik
+                chartVaksin.Titles.Add("Visualisasi Ketersediaan Stok Vaksin");
+                chartVaksin.Titles[0].Font = new Font("Segoe UI", 12, FontStyle.Bold);
+
+                // 3. Buat seri data baru (Batang Grafik)
+                Series series = chartVaksin.Series.Add("Stok Vaksin");
+                series.ChartType = SeriesChartType.Column; // Grafik batang vertikal
+                series.IsValueShownAsLabel = true; // Menampilkan angka stok di atas batang
+                series.Color = Color.SteelBlue; // Warna default biru elegan
+
+                // 4. Masukkan data ke dalam grafik
+                foreach (DataRow row in dtLaporan.Rows)
+                {
+                    string namaVaksin = row["Nama Vaksin"].ToString();
+                    int stok = Convert.ToInt32(row["Stok Tersisa"]);
+
+                    // Menambahkan titik data X (Nama Vaksin) dan Y (Jumlah Stok)
+                    int pointIndex = series.Points.AddXY(namaVaksin, stok);
+
+                    // Jika stok kritis (< 10), ubah warna batang tersebut menjadi merah
+                    if (stok < 10)
+                    {
+                        series.Points[pointIndex].Color = Color.IndianRed;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                DatabaseHelper.CatatLogError("FormLaporan (Render Grafik): " + ex.Message);
             }
         }
 
@@ -158,6 +213,9 @@ namespace PosyanduProject
 
                 if (lblStatusLaporan != null)
                     lblStatusLaporan.Text = $"Mode: Cakupan {cmbBulan.Text} {tahun} | Total: {dtLaporan.Rows.Count} Transaksi";
+
+                // Sembunyikan grafik karena kita sedang melihat data cakupan imunisasi, bukan stok
+                if (chartVaksin != null) chartVaksin.Visible = false;
             }
             catch (Exception ex)
             {
@@ -209,5 +267,10 @@ namespace PosyanduProject
         // ==============================================================
         private void btnRefreshStok_Click(object sender, EventArgs e) => LoadLaporanStok();
         private void btnFilterCakupan_Click(object sender, EventArgs e) => LoadCakupanImunisasi();
+
+        private void chartVaksin_Click(object sender, EventArgs e)
+        {
+            // Dibiarkan kosong agar tidak error di UI Designer
+        }
     }
 }

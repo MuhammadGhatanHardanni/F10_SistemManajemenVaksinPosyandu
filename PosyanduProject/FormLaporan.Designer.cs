@@ -28,6 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.btnRefreshStok = new System.Windows.Forms.Button();
             this.labelBulan = new System.Windows.Forms.Label();
             this.cmbBulan = new System.Windows.Forms.ComboBox();
@@ -36,7 +39,9 @@
             this.btnFilterCakupan = new System.Windows.Forms.Button();
             this.lblStatusLaporan = new System.Windows.Forms.Label();
             this.dgvLaporan = new System.Windows.Forms.DataGridView();
+            this.chartVaksin = new System.Windows.Forms.DataVisualization.Charting.Chart();
             ((System.ComponentModel.ISupportInitialize)(this.dgvLaporan)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartVaksin)).BeginInit();
             this.SuspendLayout();
             // 
             // btnRefreshStok
@@ -106,9 +111,8 @@
             // 
             // dgvLaporan
             // 
-            this.dgvLaporan.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dgvLaporan.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.dgvLaporan.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvLaporan.BackgroundColor = System.Drawing.Color.White;
             this.dgvLaporan.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -117,8 +121,28 @@
             this.dgvLaporan.RowHeadersVisible = false;
             this.dgvLaporan.RowHeadersWidth = 51;
             this.dgvLaporan.RowTemplate.Height = 24;
-            this.dgvLaporan.Size = new System.Drawing.Size(688, 349);
+            this.dgvLaporan.Size = new System.Drawing.Size(467, 349);
             this.dgvLaporan.TabIndex = 7;
+            // 
+            // chartVaksin
+            // 
+            this.chartVaksin.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            chartArea1.Name = "ChartArea1";
+            this.chartVaksin.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            this.chartVaksin.Legends.Add(legend1);
+            this.chartVaksin.Location = new System.Drawing.Point(488, 89);
+            this.chartVaksin.Name = "chartVaksin";
+            series1.ChartArea = "ChartArea1";
+            series1.Legend = "Legend1";
+            series1.Name = "Series1";
+            this.chartVaksin.Series.Add(series1);
+            this.chartVaksin.Size = new System.Drawing.Size(300, 349);
+            this.chartVaksin.TabIndex = 8;
+            this.chartVaksin.Text = "chart1";
+            this.chartVaksin.Click += new System.EventHandler(this.chartVaksin_Click);
             // 
             // FormLaporan
             // 
@@ -126,6 +150,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.chartVaksin);
             this.Controls.Add(this.dgvLaporan);
             this.Controls.Add(this.lblStatusLaporan);
             this.Controls.Add(this.btnFilterCakupan);
@@ -138,6 +163,7 @@
             this.Text = "FormLaporan";
             this.Load += new System.EventHandler(this.FormLaporan_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvLaporan)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartVaksin)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -153,5 +179,6 @@
         private System.Windows.Forms.Button btnFilterCakupan;
         private System.Windows.Forms.Label lblStatusLaporan;
         private System.Windows.Forms.DataGridView dgvLaporan;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartVaksin;
     }
 }
