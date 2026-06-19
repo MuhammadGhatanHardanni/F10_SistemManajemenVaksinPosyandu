@@ -1,4 +1,4 @@
--- SISTEM MANAJEMEN VAKSIN POSYANDU
+﻿-- SISTEM MANAJEMEN VAKSIN POSYANDU
 CREATE DATABASE SistemManajemenPosyandu;
 GO
 
@@ -174,6 +174,18 @@ SELECT
 FROM Catatan_Pertumbuhan cp
 JOIN Balita b ON cp.id_balita = b.id_balita;
 GO
+
+CREATE VIEW vwLaporanStokVaksin AS
+SELECT 
+    nama_vaksin AS [Nama Vaksin], 
+    stok AS [Stok Tersisa], 
+    CONVERT(varchar, tgl_kedaluwarsa, 106) AS [Kedaluwarsa],
+    CASE 
+        WHEN tgl_kedaluwarsa < GETDATE() THEN N'⚠️ KEDALUWARSA!'
+        WHEN stok < 10 THEN N'❗ Stok Rendah'
+        ELSE N'✅ Aman' 
+    END AS [Keterangan]
+FROM Vaksin;
 
 -- STORED PROCEDURES (CRUD & SEARCH)
 
@@ -482,3 +494,75 @@ BEGIN
     SELECT @Total = COUNT(*) FROM Catatan_Pertumbuhan; 
 END;
 GO
+
+
+-- SP Laporan
+CREATE PROCEDURE sp_FilterCakupanImunisasi
+    @bln INT,
+    @thn INT
+AS
+BEGIN
+    SELECT b.nama_balita AS [Nama Anak], 
+           v.nama_vaksin AS [Vaksin],
+           CONVERT(varchar, ti.tgl_suntik, 103) AS [Tanggal], 
+           u.nama_lengkap AS [Petugas], 
+           ti.status AS [Status]
+    FROM Transaksi_Imunisasi ti
+    JOIN Balita b ON b.id_balita = ti.id_balita
+    JOIN Vaksin v ON v.id_vaksin = ti.id_vaksin
+    JOIN Users u ON u.id_user = ti.id_petugas
+    WHERE MONTH(ti.tgl_suntik) = @bln AND YEAR(ti.tgl_suntik) = @thn
+    ORDER BY ti.tgl_suntik DESC;
+END
+
+CREATE PROCEDURE sp_RiwayatImunisasiOrangTua
+    @uid INT
+AS
+BEGIN
+    SELECT b.nama_balita AS [Nama Anak], 
+           v.nama_vaksin AS [Vaksin],
+           CONVERT(varchar, ti.tgl_suntik, 103) AS [Tanggal], 
+           ti.status AS [Status]
+    FROM Transaksi_Imunisasi ti
+    JOIN Balita b ON b.id_balita = ti.id_balita
+    JOIN Vaksin v ON v.id_vaksin = ti.id_vaksin
+    JOIN Users u ON u.nama_lengkap = b.nama_ortu
+    WHERE u.id_user = @uid
+    ORDER BY ti.tgl_suntik DESC;
+END
+
+-- SP Login
+CREATE PROCEDURE sp_LoginUser
+    @username VARCHAR(50),
+    @password VARCHAR(50)
+AS
+BEGIN
+    -- Hanya menampilkan data jika username dan password cocok persis
+    SELECT id_user, nama_lengkap, username, role 
+    FROM Users 
+    WHERE username = @username AND password = @password;
+END
+
+-- SP Register
+CREATE PROCEDURE sp_RegisterUser
+    @nama VARCHAR(100),
+    @user VARCHAR(50),
+    @pass VARCHAR(50)
+AS
+BEGIN
+    -- Logika Percabangan di dalam Database (Memenuhi Syarat Ujian No. 1)
+    IF EXISTS (SELECT 1 FROM Users WHERE username = @user)
+    BEGIN
+        -- Jika username sudah ada, kembalikan angka 0 (Gagal)
+        SELECT 0 AS Result;
+    END
+    ELSE
+    BEGIN
+        -- Jika username belum ada, lakukan pendaftaran (Insert)
+        INSERT INTO Users (nama_lengkap, username, password, role) 
+        VALUES (@nama, @user, @pass, 'OrangTua');
+        
+        -- Kembalikan angka 1 (Sukses)
+        SELECT 1 AS Result;
+    END
+END
