@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Data.SqlClient;
 using System.Windows.Forms;
 
@@ -29,7 +30,7 @@ namespace PosyanduProject
                 return;
             }
 
-            // [VALIDASI BARU] Mengecek panjang minimal password untuk keamanan
+            // [VALIDASI] Mengecek panjang minimal password untuk keamanan
             if (txtPassword.Text.Length < 6)
             {
                 MessageBox.Show("Password minimal harus 6 karakter!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -46,31 +47,33 @@ namespace PosyanduProject
 
             try
             {
-                // Cek apakah username sudah dipakai
-                int cekUser = Convert.ToInt32(DatabaseHelper.ExecuteScalar(
-                    "SELECT COUNT(*) FROM Users WHERE username=@u",
-                    new SqlParameter("@u", txtUsername.Text.Trim())));
-
-                if (cekUser > 0)
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
                 {
-                    MessageBox.Show("Username sudah digunakan, silakan pilih yang lain.", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    txtUsername.Focus();
-                    return;
-                }
+                    // Memanggil STORED PROCEDURE Cerdas
+                    using (SqlCommand cmd = new SqlCommand("sp_RegisterUser", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@nama", txtNama.Text.Trim());
+                        cmd.Parameters.AddWithValue("@user", txtUsername.Text.Trim());
+                        cmd.Parameters.AddWithValue("@pass", txtPassword.Text);
 
-                // Insert data sebagai OrangTua
-                string sql = "INSERT INTO Users (nama_lengkap, username, password, role) VALUES (@nama, @user, @pass, 'OrangTua')";
+                        conn.Open();
+                        // Mengambil hasil dari operasi IF EXISTS di dalam SQL Server
+                        int result = Convert.ToInt32(cmd.ExecuteScalar());
 
-                int baris = DatabaseHelper.ExecuteNonQuery(sql,
-                    new SqlParameter("@nama", txtNama.Text.Trim()),
-                    new SqlParameter("@user", txtUsername.Text.Trim()),
-                    new SqlParameter("@pass", txtPassword.Text)
-                );
-
-                if (baris > 0)
-                {
-                    MessageBox.Show("✅ Akun berhasil dibuat! Silakan Login.", "Berhasil", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    this.Close(); // Menutup form register dan kembali ke form login
+                        if (result == 0)
+                        {
+                            // Output 0 berarti SP menemukan username duplikat
+                            MessageBox.Show("Username sudah digunakan, silakan pilih yang lain.", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            txtUsername.Focus();
+                        }
+                        else if (result == 1)
+                        {
+                            // Output 1 berarti SP berhasil melakukan Insert
+                            MessageBox.Show("✅ Akun berhasil dibuat! Silakan Login.", "Berhasil", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            this.Close(); // Menutup form register dan kembali ke form login
+                        }
+                    }
                 }
             }
             catch (Exception ex)
