@@ -4,6 +4,8 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.IO; // [TAMBAHAN] Wajib untuk membaca file
+using ExcelDataReader; // [TAMBAHAN] Library untuk membaca Excel
 
 namespace PosyanduProject
 {
@@ -444,6 +446,78 @@ namespace PosyanduProject
             // Membatasi input nama hanya huruf, spasi, kutip tunggal, dan strip
             if (!char.IsControl(e.KeyChar) && !char.IsLetter(e.KeyChar) && !char.IsWhiteSpace(e.KeyChar) && e.KeyChar != '\'' && e.KeyChar != '-')
                 e.Handled = true;
+        }
+
+        // ====================================================================
+        // [FITUR UCP 3] MENGIMPORT DATA DARI EXCEL LALU DISIMPAN KE DATABASE
+        // Sesuai Modul 14
+        // ====================================================================
+        private void btnImportExcel_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog() { Filter = "Excel Workbook|*.xlsx;*.xls", Title = "Pilih File Excel Data Balita" })
+            {
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        // 1. Membaca file Excel yang dipilih [Sesuai Modul 14]
+                        using (var stream = File.Open(ofd.FileName, FileMode.Open, FileAccess.Read))
+                        using (var reader = ExcelReaderFactory.CreateReader(stream))
+                        {
+                            var result = reader.AsDataSet(new ExcelDataSetConfiguration()
+                            {
+                                ConfigureDataTable = (_) => new ExcelDataTableConfiguration() { UseHeaderRow = true }
+                            });
+
+                            DataTable dtExcel = result.Tables[0];
+                            int sukses = 0;
+                            int gagal = 0;
+
+                            // 2. Melakukan looping untuk menyimpan setiap baris dari Excel ke Database
+                            foreach (DataRow row in dtExcel.Rows)
+                            {
+                                try
+                                {
+                                    using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                                    {
+                                        using (SqlCommand cmd = new SqlCommand("sp_InsertBalita", conn))
+                                        {
+                                            cmd.CommandType = CommandType.StoredProcedure;
+
+                                            // Memetakan header kolom Excel ke Parameter SP
+                                            // Pastikan header di excel sama persis dengan yang ada di dalam tanda kutip ini:
+                                            cmd.Parameters.AddWithValue("@id_ortu", row["ID_OrangTua"]);
+                                            cmd.Parameters.AddWithValue("@nik", row["NIK"].ToString());
+                                            cmd.Parameters.AddWithValue("@nama", row["Nama_Balita"].ToString());
+                                            cmd.Parameters.AddWithValue("@tgl", Convert.ToDateTime(row["Tanggal_Lahir"]));
+                                            cmd.Parameters.AddWithValue("@jk", row["Jenis_Kelamin"].ToString());
+                                            cmd.Parameters.AddWithValue("@ortu", row["Nama_OrangTua"].ToString());
+
+                                            conn.Open();
+                                            cmd.ExecuteNonQuery();
+                                            sukses++;
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    gagal++;
+                                    // Log error spesifik untuk mengetahui baris NIK mana yang gagal/duplikat
+                                    DatabaseHelper.CatatLogError($"FormBalita (Gagal Import NIK {row["NIK"]}): " + ex.Message);
+                                }
+                            }
+
+                            MessageBox.Show($"Proses Import Selesai!\n\nBerhasil dimasukkan: {sukses} data\nGagal/Duplikat: {gagal} data", "Info Import", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            LoadData(); // Segarkan tabel di layar setelah import selesai
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Gagal membaca file Excel. Pastikan file tidak sedang dibuka di aplikasi lain.\n\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        DatabaseHelper.CatatLogError("FormBalita (Baca Excel): " + ex.Message);
+                    }
+                }
+            }
         }
     }
 }
