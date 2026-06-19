@@ -72,7 +72,11 @@ namespace PosyanduProject
                 if (cmbVaksin.Items.Count > 0) cmbVaksin.SelectedIndex = -1;
                 if (cmbJadwal.Items.Count > 0) cmbJadwal.SelectedIndex = -1;
             }
-            catch (Exception ex) { MessageBox.Show("Gagal memuat dropdown: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal memuat dropdown: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                DatabaseHelper.CatatLogError("FormImunisasi (Load ComboBoxes): " + ex.Message);
+            }
         }
 
         private void cmbVaksin_SelectedIndexChanged(object sender, EventArgs e)
@@ -100,7 +104,11 @@ namespace PosyanduProject
                         txtStokInfo.BackColor = SystemColors.Control;
                 }
             }
-            catch (Exception ex) { MessageBox.Show("Gagal mengambil info stok: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal mengambil info stok: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormImunisasi (Cek Stok Vaksin): " + ex.Message);
+            }
         }
 
         // ==========================================
@@ -126,7 +134,11 @@ namespace PosyanduProject
                 FormatGrid(); // Panggil fungsi mewarnai tabel
                 HitungTotal(); // Panggil SP Count
             }
-            catch (Exception ex) { MessageBox.Show("Gagal memuat data: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal memuat data: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormImunisasi (Load Data): " + ex.Message);
+            }
         }
 
         private void FormatGrid()
@@ -204,7 +216,11 @@ namespace PosyanduProject
                     }
                 }
             }
-            catch (Exception ex) { MessageBox.Show("Gagal menghitung total: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal menghitung total: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormImunisasi (Hitung Total): " + ex.Message);
+            }
         }
 
         // ==========================================
@@ -237,7 +253,7 @@ namespace PosyanduProject
                 using (var conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
-                    using (var trx = conn.BeginTransaction()) // LOGIKA TRANSAKSI ANDA DIPERTAHANKAN!
+                    using (var trx = conn.BeginTransaction()) // LOGIKA TRANSAKSI
                     {
                         try
                         {
@@ -271,11 +287,16 @@ namespace PosyanduProject
                         {
                             trx.Rollback();
                             MessageBox.Show("Transaksi Gagal: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            DatabaseHelper.CatatLogError("FormImunisasi (Transaksi Simpan Rollback): " + ex.Message);
                         }
                     }
                 }
             }
-            catch (Exception ex) { MessageBox.Show("Koneksi Gagal: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Koneksi Gagal: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormImunisasi (Koneksi Simpan): " + ex.Message);
+            }
 
             if (isSuccess)
             {
@@ -309,7 +330,11 @@ namespace PosyanduProject
                 LoadData();
                 LoadComboBoxes();
             }
-            catch (Exception ex) { MessageBox.Show("Error Update: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error Update: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormImunisasi (Update): " + ex.Message);
+            }
         }
 
         private void btnHapus_Click(object sender, EventArgs e)
@@ -342,9 +367,12 @@ namespace PosyanduProject
                 BersihForm();
                 LoadData();
             }
-            catch (Exception ex) { MessageBox.Show("Gagal menghapus data: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal menghapus data: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormImunisasi (Hapus): " + ex.Message);
+            }
         }
-
 
         private void btnCari_Click(object sender, EventArgs e)
         {
@@ -367,7 +395,11 @@ namespace PosyanduProject
                 }
                 FormatGrid();
             }
-            catch (Exception ex) { MessageBox.Show("Gagal mencari data: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal mencari data: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormImunisasi (Cari): " + ex.Message);
+            }
         }
 
         private void btnBersih_Click(object sender, EventArgs e) => BersihForm();
@@ -421,14 +453,18 @@ namespace PosyanduProject
                     }
                 }
             }
-            catch (Exception ex) { MessageBox.Show("Gagal memverifikasi umur balita: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal memverifikasi umur balita: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormImunisasi (Validasi Umur): " + ex.Message);
+            }
 
             return true;
         }
 
         private void txtNoAntrean_KeyPress(object sender, KeyPressEventArgs e)
         {
-            
+
         }
 
         private void BersihForm()
