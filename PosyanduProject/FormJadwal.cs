@@ -82,7 +82,13 @@ namespace PosyanduProject
 
                 HitungTotal();
             }
-            catch (Exception ex) { MessageBox.Show("Gagal memuat data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal memuat data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormJadwal (Load Data): " + ex.Message);
+            }
         }
 
         // IMPLEMENTASI BINDING
@@ -145,7 +151,13 @@ namespace PosyanduProject
                     }
                 }
             }
-            catch (Exception ex) { MessageBox.Show("Gagal menghitung total: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal menghitung total: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormJadwal (Hitung Total): " + ex.Message);
+            }
         }
 
         // 5. CRUD MENGGUNAKAN STORED PROCEDURE
@@ -189,7 +201,13 @@ namespace PosyanduProject
                 BersihForm();
                 LoadData();
             }
-            catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormJadwal (Tambah): " + ex.Message);
+            }
         }
 
         private void btnUpdate_Click(object sender, EventArgs e)
@@ -231,7 +249,13 @@ namespace PosyanduProject
                 BersihForm();
                 LoadData();
             }
-            catch (Exception ex) { MessageBox.Show("Error: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormJadwal (Update): " + ex.Message);
+            }
         }
 
         private void btnHapus_Click(object sender, EventArgs e)
@@ -260,6 +284,9 @@ namespace PosyanduProject
             {
                 if (ex.Number == 547) MessageBox.Show("Akses Ditolak: Jadwal sudah dipakai dalam transaksi imunisasi, tidak bisa dihapus.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 else MessageBox.Show("Error Database: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormJadwal (Hapus): " + ex.Message);
             }
         }
 
@@ -283,7 +310,13 @@ namespace PosyanduProject
                     }
                 }
             }
-            catch (Exception ex) { MessageBox.Show("Gagal mencari data: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal mencari data: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormJadwal (Cari): " + ex.Message);
+            }
         }
 
         // EVENT & VALIDASI
