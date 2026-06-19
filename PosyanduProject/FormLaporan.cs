@@ -108,6 +108,9 @@ namespace PosyanduProject
             catch (Exception ex)
             {
                 MessageBox.Show("Gagal memuat laporan stok: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormLaporan (Load Laporan Stok): " + ex.Message);
             }
         }
 
@@ -159,6 +162,9 @@ namespace PosyanduProject
             catch (Exception ex)
             {
                 MessageBox.Show("Gagal memuat cakupan imunisasi: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormLaporan (Load Cakupan Imunisasi): " + ex.Message);
             }
         }
 
@@ -192,6 +198,9 @@ namespace PosyanduProject
             catch (Exception ex)
             {
                 MessageBox.Show("Gagal memuat riwayat: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormLaporan (Load Riwayat Orang Tua): " + ex.Message);
             }
         }
 
