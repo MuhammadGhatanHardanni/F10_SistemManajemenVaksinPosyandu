@@ -92,7 +92,13 @@ namespace PosyanduProject
                     cmbOrangTua.SelectedIndex = -1;
                 }
             }
-            catch (Exception ex) { MessageBox.Show("Gagal memuat data Orang Tua: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal memuat data Orang Tua: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormBalita (Load Data Ortu): " + ex.Message);
+            }
         }
 
         //LOAD DATA MENGGUNAKAN VIEW
@@ -115,10 +121,16 @@ namespace PosyanduProject
 
                 HitungTotal();
             }
-            catch (Exception ex) { MessageBox.Show("Gagal memuat data: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal memuat data: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormBalita (Load Data Utama): " + ex.Message);
+            }
         }
 
-        // IMPLEMENTASI BINDING (SUDAH DI-UPDATE)
+        // IMPLEMENTASI BINDING
         private void BindControls()
         {
             if (txtIdBalita != null)
@@ -137,14 +149,12 @@ namespace PosyanduProject
                 txtNamaBalita.DataBindings.Add("Text", bindingSource, "Nama Balita");
             }
 
-            // [UPDATE] Binding untuk ComboBox Nama Orang Tua
             if (cmbOrangTua != null)
             {
                 cmbOrangTua.DataBindings.Clear();
                 cmbOrangTua.DataBindings.Add("Text", bindingSource, "Nama Ortu");
             }
 
-            // [UPDATE] Binding untuk DateTimePicker Tanggal Lahir
             if (dtpLahir != null)
             {
                 dtpLahir.DataBindings.Clear();
@@ -174,7 +184,6 @@ namespace PosyanduProject
                             lblTotal.Text = "Total Balita Terdaftar: " + outputParam.Value.ToString();
                         }
 
-                        // Opsional: Tetap tampilkan di Title Bar
                         this.Text = "Manajemen Balita | " + outputParam.Value.ToString() + " Data";
                     }
                 }
@@ -182,6 +191,9 @@ namespace PosyanduProject
             catch (Exception ex)
             {
                 MessageBox.Show("Gagal menghitung total: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormBalita (Hitung Total): " + ex.Message);
             }
         }
 
@@ -216,6 +228,9 @@ namespace PosyanduProject
             {
                 if (ex.Number == 2627) MessageBox.Show("NIK sudah terdaftar!", "Duplikasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 else MessageBox.Show("Error Database: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormBalita (Tambah): " + ex.Message);
             }
         }
 
@@ -250,6 +265,9 @@ namespace PosyanduProject
             {
                 if (ex.Number == 2627) MessageBox.Show("NIK sudah digunakan balita lain!", "Duplikasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 else MessageBox.Show("Error Database: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormBalita (Update): " + ex.Message);
             }
         }
 
@@ -279,6 +297,9 @@ namespace PosyanduProject
             {
                 if (ex.Number == 547) MessageBox.Show("Akses Ditolak: Balita memiliki riwayat imunisasi/pertumbuhan.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 else MessageBox.Show("Error: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormBalita (Hapus): " + ex.Message);
             }
         }
 
@@ -303,14 +324,19 @@ namespace PosyanduProject
                     }
                 }
             }
-            catch (Exception ex) { MessageBox.Show("Gagal mencari data: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal mencari data: " + ex.Message);
+
+                // [TAMBAHAN UCP 3] Log Error
+                DatabaseHelper.CatatLogError("FormBalita (Cari): " + ex.Message);
+            }
         }
 
         private void btnTampilkan_Click(object sender, EventArgs e) { txtCari.Clear(); LoadData(); }
         private void txtCari_KeyDown(object sender, KeyEventArgs e) { if (e.KeyCode == Keys.Enter) btnCari_Click(sender, e); }
         private void btnBersih_Click(object sender, EventArgs e) => BersihForm();
 
-        // [UPDATE] MENGATUR COMBOBOX JENIS KELAMIN SAAT TABEL DIKLIK
         private void dgvBalita_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
