@@ -97,7 +97,11 @@ namespace PosyanduProject
 
                 cmbBalita.SelectedIndex = -1;
             }
-            catch (Exception ex) { MessageBox.Show("Gagal memuat Balita: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal memuat Balita: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormPertumbuhan (Load Balita): " + ex.Message);
+            }
         }
 
         private void LoadData()
@@ -118,14 +122,18 @@ namespace PosyanduProject
                         // 2. Sambungkan ke Tabel (DataGridView)
                         if (dgvPertumbuhan != null) dgvPertumbuhan.DataSource = bindingSource;
 
-                        // 3. [TAMBAHKAN BARIS INI] Paksa Navigator untuk membaca data yang sama!
+                        // 3. Paksa Navigator untuk membaca data yang sama!
                         if (bindingNavigator1 != null) bindingNavigator1.BindingSource = bindingSource;
                     }
                 }
 
                 HitungTotal(); // Panggil SP Count
             }
-            catch (Exception ex) { MessageBox.Show("Gagal memuat data: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal memuat data: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormPertumbuhan (Load Data): " + ex.Message);
+            }
         }
 
         private void BindControls()
@@ -181,12 +189,19 @@ namespace PosyanduProject
                         conn.Open();
                         cmd.ExecuteNonQuery();
 
-                        lblTotal.Text = "Total Catatan Pertumbuhan: " + outputParam.Value.ToString();
+                        if (lblTotal != null)
+                        {
+                            lblTotal.Text = "Total Catatan Pertumbuhan: " + outputParam.Value.ToString();
+                        }
                         this.Text = "Manajemen Pertumbuhan Balita | " + outputParam.Value.ToString() + " Catatan Data";
                     }
                 }
             }
-            catch (Exception ex) { MessageBox.Show("Gagal menghitung total: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal menghitung total: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormPertumbuhan (Hitung Total): " + ex.Message);
+            }
         }
 
         private void btnSimpan_Click(object sender, EventArgs e)
@@ -217,7 +232,11 @@ namespace PosyanduProject
                 BersihForm();
                 LoadData();
             }
-            catch (Exception ex) { MessageBox.Show("Gagal Simpan: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal Simpan: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormPertumbuhan (Tambah): " + ex.Message);
+            }
         }
 
         private void btnUpdate_Click(object sender, EventArgs e)
@@ -246,7 +265,11 @@ namespace PosyanduProject
                 MessageBox.Show("✅ Data berhasil diperbarui!", "Sukses", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoadData();
             }
-            catch (Exception ex) { MessageBox.Show("Gagal Update: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal Update: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormPertumbuhan (Update): " + ex.Message);
+            }
         }
 
         private void btnHapus_Click(object sender, EventArgs e)
@@ -271,7 +294,11 @@ namespace PosyanduProject
                 BersihForm();
                 LoadData();
             }
-            catch (Exception ex) { MessageBox.Show("Gagal Hapus: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal Hapus: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormPertumbuhan (Hapus): " + ex.Message);
+            }
         }
 
         private void btnCari_Click(object sender, EventArgs e)
@@ -294,7 +321,11 @@ namespace PosyanduProject
                     }
                 }
             }
-            catch (Exception ex) { MessageBox.Show("Gagal mencari data: " + ex.Message); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Gagal mencari data: " + ex.Message);
+                DatabaseHelper.CatatLogError("FormPertumbuhan (Cari): " + ex.Message);
+            }
         }
 
         private void btnBersih_Click(object sender, EventArgs e) => BersihForm();
@@ -384,14 +415,4 @@ namespace PosyanduProject
             if (dtpTimbang != null) dtpTimbang.Value = DateTime.Today;
         }
     }
-
-    /*
-    public class ComboItem
-    {
-        public int Id { get; }
-        public string Teks { get; }
-        public ComboItem(int id, string teks) { Id = id; Teks = teks; }
-        public override string ToString() => Teks;
-    }
-    */
 }
