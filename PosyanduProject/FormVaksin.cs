@@ -4,6 +4,8 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.IO; // [TAMBAHAN] Wajib untuk membaca file Excel
+using ExcelDataReader; // [TAMBAHAN] Library pembaca Excel
 
 namespace PosyanduProject
 {
@@ -382,6 +384,74 @@ namespace PosyanduProject
         private void txtNamaVaksin_KeyPress(object sender, KeyPressEventArgs e)
         {
 
+        }
+
+        // ====================================================================
+        // [FITUR UCP 3] MENGIMPORT DATA DARI EXCEL LALU DISIMPAN KE DATABASE
+        // ====================================================================
+        private void btnImportExcel_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog() { Filter = "Excel Workbook|*.xlsx;*.csv", Title = "Pilih File Data Vaksin" })
+            {
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        // Membaca file yang dipilih
+                        using (var stream = File.Open(ofd.FileName, FileMode.Open, FileAccess.Read))
+                        using (var reader = ExcelReaderFactory.CreateReader(stream))
+                        {
+                            var result = reader.AsDataSet(new ExcelDataSetConfiguration()
+                            {
+                                ConfigureDataTable = (_) => new ExcelDataTableConfiguration() { UseHeaderRow = true }
+                            });
+
+                            DataTable dtExcel = result.Tables[0];
+                            int sukses = 0;
+                            int gagal = 0;
+
+                            // Melakukan looping untuk menyimpan setiap baris dari Excel ke Database
+                            foreach (DataRow row in dtExcel.Rows)
+                            {
+                                try
+                                {
+                                    using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                                    {
+                                        using (SqlCommand cmd = new SqlCommand("sp_InsertVaksin", conn))
+                                        {
+                                            cmd.CommandType = CommandType.StoredProcedure;
+
+                                            // Mapping header ke Parameter SP
+                                            cmd.Parameters.AddWithValue("@nama", row["Nama_Vaksin"].ToString());
+                                            cmd.Parameters.AddWithValue("@stok", Convert.ToInt32(row["Stok"]));
+                                            cmd.Parameters.AddWithValue("@deskripsi", row["Deskripsi"].ToString());
+                                            cmd.Parameters.AddWithValue("@tgl", Convert.ToDateTime(row["Tanggal_Kedaluwarsa"]));
+
+                                            conn.Open();
+                                            cmd.ExecuteNonQuery();
+                                            sukses++;
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    gagal++;
+                                    // Log error spesifik untuk mengetahui baris mana yang gagal
+                                    DatabaseHelper.CatatLogError($"FormVaksin (Gagal Import {row["Nama_Vaksin"]}): " + ex.Message);
+                                }
+                            }
+
+                            MessageBox.Show($"Proses Import Selesai!\n\nBerhasil dimasukkan: {sukses} vaksin\nGagal: {gagal} vaksin", "Info Import", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            LoadData(); // Segarkan tabel di layar
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Gagal membaca file Excel. Pastikan file ditutup di aplikasi lain.\n\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        DatabaseHelper.CatatLogError("FormVaksin (Baca Excel): " + ex.Message);
+                    }
+                }
+            }
         }
     }
 }
