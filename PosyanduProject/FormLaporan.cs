@@ -8,6 +8,10 @@ namespace PosyanduProject
 {
     public partial class FormLaporan : Form
     {
+        // 1. Deklarasi Data Binding (Syarat Ujian)
+        private BindingSource bindingSource = new BindingSource();
+        private DataTable dtLaporan = new DataTable();
+
         public FormLaporan()
         {
             InitializeComponent();
@@ -15,7 +19,7 @@ namespace PosyanduProject
 
         private void FormLaporan_Load(object sender, EventArgs e)
         {
-            // Mencegah user mengedit isi tabel laporan
+            // Mencegah user mengedit isi tabel laporan (Wajib untuk form Laporan)
             if (dgvLaporan != null)
             {
                 dgvLaporan.ReadOnly = true;
@@ -25,7 +29,7 @@ namespace PosyanduProject
 
             SetupFilterControls();
 
-            // Menerapkan tampilan berdasarkan Role
+            // Menerapkan tampilan berdasarkan Role Akses
             if (SessionManager.Role == "OrangTua")
             {
                 ApplyOrangTuaView();
@@ -65,35 +69,41 @@ namespace PosyanduProject
             if (labelTahun != null) labelTahun.Visible = false;
         }
 
+        // ==============================================================
+        // SYARAT UJIAN 1: PENGGUNAAN VIEW (Untuk Kueri Tampil Data)
+        // ==============================================================
         private void LoadLaporanStok()
         {
-            if (dgvLaporan == null) return;
-
-            string sql = @"SELECT v.nama_vaksin AS [Nama Vaksin], 
-                                  v.stok AS [Stok Tersisa], 
-                                  CONVERT(varchar, v.tgl_kedaluwarsa, 106) AS [Kedaluwarsa],
-                                  CASE 
-                                    WHEN v.tgl_kedaluwarsa < GETDATE() THEN '⚠️ KEDALUWARSA!'
-                                    WHEN v.stok < 10 THEN '❗ Stok Rendah'
-                                    ELSE '✅ Aman' 
-                                  END AS [Keterangan]
-                           FROM Vaksin v 
-                           ORDER BY v.stok ASC";
-
             try
             {
-                DataTable dt = DatabaseHelper.GetDataTable(sql);
-                dgvLaporan.DataSource = dt;
-
-                foreach (DataGridViewRow row in dgvLaporan.Rows)
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
                 {
-                    string ket = row.Cells["Keterangan"].Value?.ToString() ?? "";
-                    if (ket.Contains("KEDALUWARSA")) row.DefaultCellStyle.BackColor = Color.LightCoral;
-                    else if (ket.Contains("Rendah")) row.DefaultCellStyle.BackColor = Color.LightYellow;
+                    // Memanggil objek VIEW yang sudah dibuat di SQL Server
+                    string query = "SELECT * FROM vwLaporanStokVaksin";
+                    using (SqlDataAdapter da = new SqlDataAdapter(query, conn))
+                    {
+                        dtLaporan = new DataTable();
+                        da.Fill(dtLaporan);
+
+                        // Menerapkan Binding ke DataGridView
+                        bindingSource.DataSource = dtLaporan;
+                        if (dgvLaporan != null) dgvLaporan.DataSource = bindingSource;
+                    }
+                }
+
+                // Pewarnaan Kondisional Dinamis
+                if (dgvLaporan != null)
+                {
+                    foreach (DataGridViewRow row in dgvLaporan.Rows)
+                    {
+                        string ket = row.Cells["Keterangan"].Value?.ToString() ?? "";
+                        if (ket.Contains("KEDALUWARSA")) row.DefaultCellStyle.BackColor = Color.LightCoral;
+                        else if (ket.Contains("Rendah")) row.DefaultCellStyle.BackColor = Color.LightYellow;
+                    }
                 }
 
                 if (lblStatusLaporan != null)
-                    lblStatusLaporan.Text = $"Mode: Rekap Stok | Total Jenis Vaksin: {dt.Rows.Count}";
+                    lblStatusLaporan.Text = $"Mode: Rekap Stok | Total Jenis Vaksin: {dtLaporan.Rows.Count}";
             }
             catch (Exception ex)
             {
@@ -101,37 +111,50 @@ namespace PosyanduProject
             }
         }
 
+        // ==============================================================
+        // SYARAT UJIAN 2: PENGGUNAAN STORED PROCEDURE (Untuk Pemfilteran)
+        // ==============================================================
         private void LoadCakupanImunisasi()
         {
-            if (dgvLaporan == null || cmbBulan == null || cmbTahun == null) return;
+            if (cmbBulan == null || cmbTahun == null || cmbTahun.SelectedItem == null) return;
 
             int bulan = cmbBulan.SelectedIndex + 1;
-
-            if (cmbTahun.SelectedItem == null) return;
             int tahun = Convert.ToInt32(cmbTahun.SelectedItem);
-
-            string sql = @"SELECT b.nama_balita AS [Nama Anak], 
-                                  v.nama_vaksin AS [Vaksin],
-                                  CONVERT(varchar, ti.tgl_suntik, 103) AS [Tanggal], 
-                                  u.nama_lengkap AS [Petugas], 
-                                  ti.status AS [Status]
-                           FROM Transaksi_Imunisasi ti
-                           JOIN Balita b ON b.id_balita = ti.id_balita
-                           JOIN Vaksin v ON v.id_vaksin = ti.id_vaksin
-                           JOIN Users u ON u.id_user = ti.id_petugas
-                           WHERE MONTH(ti.tgl_suntik) = @bln AND YEAR(ti.tgl_suntik) = @thn
-                           ORDER BY ti.tgl_suntik DESC";
 
             try
             {
-                DataTable dt = DatabaseHelper.GetDataTable(sql,
-                               new SqlParameter("@bln", bulan),
-                               new SqlParameter("@thn", tahun));
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    // Memanggil Stored Procedure untuk Filter
+                    using (SqlCommand cmd = new SqlCommand("sp_FilterCakupanImunisasi", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@bln", bulan);
+                        cmd.Parameters.AddWithValue("@thn", tahun);
 
-                dgvLaporan.DataSource = dt;
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            dtLaporan = new DataTable();
+                            da.Fill(dtLaporan);
+
+                            // Menerapkan Binding ke DataGridView
+                            bindingSource.DataSource = dtLaporan;
+                            if (dgvLaporan != null) dgvLaporan.DataSource = bindingSource;
+                        }
+                    }
+                }
+
+                // Reset warna grid menjadi default jika pindah dari laporan stok
+                if (dgvLaporan != null)
+                {
+                    foreach (DataGridViewRow row in dgvLaporan.Rows)
+                    {
+                        row.DefaultCellStyle.BackColor = Color.White;
+                    }
+                }
 
                 if (lblStatusLaporan != null)
-                    lblStatusLaporan.Text = $"Mode: Cakupan {cmbBulan.Text} {tahun} | Total: {dt.Rows.Count} Transaksi";
+                    lblStatusLaporan.Text = $"Mode: Cakupan {cmbBulan.Text} {tahun} | Total: {dtLaporan.Rows.Count} Transaksi";
             }
             catch (Exception ex)
             {
@@ -141,28 +164,30 @@ namespace PosyanduProject
 
         private void LoadRiwayatOrangTua()
         {
-            if (dgvLaporan == null) return;
-
-            string sql = @"SELECT b.nama_balita AS [Nama Anak], 
-                                  v.nama_vaksin AS [Vaksin],
-                                  CONVERT(varchar, ti.tgl_suntik, 103) AS [Tanggal], 
-                                  ti.status AS [Status]
-                           FROM Transaksi_Imunisasi ti
-                           JOIN Balita b ON b.id_balita = ti.id_balita
-                           JOIN Vaksin v ON v.id_vaksin = ti.id_vaksin
-                           JOIN Users u ON u.nama_lengkap = b.nama_ortu
-                           WHERE u.id_user = @uid
-                           ORDER BY ti.tgl_suntik DESC";
-
             try
             {
-                // Menggunakan ID dari user (Orang Tua) yang sedang login
-                DataTable dt = DatabaseHelper.GetDataTable(sql, new SqlParameter("@uid", SessionManager.IdUser));
+                using (SqlConnection conn = new SqlConnection(DatabaseHelper.GetConnectionString()))
+                {
+                    // Memanggil SP Filter Khusus Role Orang Tua
+                    using (SqlCommand cmd = new SqlCommand("sp_RiwayatImunisasiOrangTua", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@uid", SessionManager.IdUser);
 
-                dgvLaporan.DataSource = dt;
+                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                        {
+                            dtLaporan = new DataTable();
+                            da.Fill(dtLaporan);
+
+                            // Menerapkan Binding
+                            bindingSource.DataSource = dtLaporan;
+                            if (dgvLaporan != null) dgvLaporan.DataSource = bindingSource;
+                        }
+                    }
+                }
 
                 if (lblStatusLaporan != null)
-                    lblStatusLaporan.Text = $"Riwayat Imunisasi Anak Anda ({dt.Rows.Count} Data)";
+                    lblStatusLaporan.Text = $"Riwayat Imunisasi Anak Anda ({dtLaporan.Rows.Count} Data)";
             }
             catch (Exception ex)
             {
@@ -170,6 +195,9 @@ namespace PosyanduProject
             }
         }
 
+        // ==============================================================
+        // TOMBOL NAVIGASI FILTER
+        // ==============================================================
         private void btnRefreshStok_Click(object sender, EventArgs e) => LoadLaporanStok();
         private void btnFilterCakupan_Click(object sender, EventArgs e) => LoadCakupanImunisasi();
     }
