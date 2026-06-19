@@ -95,6 +95,7 @@ namespace PosyanduProject
             catch (Exception ex) { MessageBox.Show("Gagal memuat data Orang Tua: " + ex.Message); }
         }
 
+        //LOAD DATA MENGGUNAKAN VIEW
         private void LoadData()
         {
             try
@@ -117,6 +118,7 @@ namespace PosyanduProject
             catch (Exception ex) { MessageBox.Show("Gagal memuat data: " + ex.Message); }
         }
 
+        // IMPLEMENTASI BINDING (SUDAH DI-UPDATE)
         private void BindControls()
         {
             if (txtIdBalita != null)
@@ -135,12 +137,14 @@ namespace PosyanduProject
                 txtNamaBalita.DataBindings.Add("Text", bindingSource, "Nama Balita");
             }
 
+            // [UPDATE] Binding untuk ComboBox Nama Orang Tua
             if (cmbOrangTua != null)
             {
                 cmbOrangTua.DataBindings.Clear();
                 cmbOrangTua.DataBindings.Add("Text", bindingSource, "Nama Ortu");
             }
 
+            // [UPDATE] Binding untuk DateTimePicker Tanggal Lahir
             if (dtpLahir != null)
             {
                 dtpLahir.DataBindings.Clear();
@@ -170,6 +174,7 @@ namespace PosyanduProject
                             lblTotal.Text = "Total Balita Terdaftar: " + outputParam.Value.ToString();
                         }
 
+                        // Opsional: Tetap tampilkan di Title Bar
                         this.Text = "Manajemen Balita | " + outputParam.Value.ToString() + " Data";
                     }
                 }
@@ -277,6 +282,7 @@ namespace PosyanduProject
             }
         }
 
+        // VALIDASI
         private void btnCari_Click(object sender, EventArgs e)
         {
             try
@@ -304,6 +310,7 @@ namespace PosyanduProject
         private void txtCari_KeyDown(object sender, KeyEventArgs e) { if (e.KeyCode == Keys.Enter) btnCari_Click(sender, e); }
         private void btnBersih_Click(object sender, EventArgs e) => BersihForm();
 
+        // [UPDATE] MENGATUR COMBOBOX JENIS KELAMIN SAAT TABEL DIKLIK
         private void dgvBalita_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
@@ -402,12 +409,15 @@ namespace PosyanduProject
 
         private void txtNik_KeyPress(object sender, KeyPressEventArgs e)
         {
-
+            // Mencegah input selain angka dan tombol kontrol (seperti Backspace)
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar)) e.Handled = true;
         }
 
         private void txtNamaBalita_KeyPress(object sender, KeyPressEventArgs e)
         {
-
+            // Membatasi input nama hanya huruf, spasi, kutip tunggal, dan strip
+            if (!char.IsControl(e.KeyChar) && !char.IsLetter(e.KeyChar) && !char.IsWhiteSpace(e.KeyChar) && e.KeyChar != '\'' && e.KeyChar != '-')
+                e.Handled = true;
         }
     }
 }

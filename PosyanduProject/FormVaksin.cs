@@ -143,7 +143,7 @@ namespace PosyanduProject
             catch (Exception ex) { MessageBox.Show("Gagal menghitung total: " + ex.Message); }
         }
 
-        // CRUD MENGGUNAKAN STORED PROCEDURE
+        // 5. CRUD MENGGUNAKAN STORED PROCEDURE
         private void btnTambah_Click(object sender, EventArgs e)
         {
             if (!ValidasiInput()) return;
@@ -296,6 +296,14 @@ namespace PosyanduProject
                 MessageBox.Show("Nama vaksin tidak boleh mengandung simbol khusus (@, #, $, dll)!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtNamaVaksin.Focus();
                 return false;
+            if (string.IsNullOrWhiteSpace(txtNamaVaksin.Text))
+            {
+                MessageBox.Show("Nama vaksin tidak boleh kosong!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false;
+            }
+
+            if (Regex.IsMatch(txtNamaVaksin.Text, @"[@#$%^&*<>]"))
+            {
+                MessageBox.Show("Nama vaksin tidak boleh mengandung simbol khusus (@, #, $, dll)!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false;            
             }
 
             if (string.IsNullOrWhiteSpace(txtStok.Text) || !int.TryParse(txtStok.Text, out int stok) || stok < 0)
@@ -303,6 +311,7 @@ namespace PosyanduProject
                 MessageBox.Show("Stok harus berupa angka positif!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtStok.Focus();
                 return false;
+            }
             }
 
             if (dtpKedaluwarsa != null)
@@ -342,13 +351,26 @@ namespace PosyanduProject
 
         private void txtStok_KeyPress(object sender, KeyPressEventArgs e)
         {
-            
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar)) e.Handled = true;
         }
 
         private void txtNamaVaksin_KeyPress(object sender, KeyPressEventArgs e)
         {
+            if (!char.IsControl(e.KeyChar) &&
+                !char.IsLetterOrDigit(e.KeyChar) &&
+                !char.IsWhiteSpace(e.KeyChar) &&
+                e.KeyChar != '-')
+            {
+                e.Handled = true;
+            }
             
-            
+            if (!char.IsControl(e.KeyChar) &&
+                !char.IsLetterOrDigit(e.KeyChar) &&
+                !char.IsWhiteSpace(e.KeyChar) &&
+                e.KeyChar != '-')
+            {
+                e.Handled = true;
+            }
         }
     }
 }

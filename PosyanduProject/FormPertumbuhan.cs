@@ -311,7 +311,18 @@ namespace PosyanduProject
         // Memblokir huruf dan simbol (kecuali koma dan titik) secara real-time
         private void txtAngkaDesimal_KeyPress(object sender, KeyPressEventArgs e)
         {
-            
+            // Mengizinkan angka, tombol backspace, koma (,), dan titik (.)
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != '.' && e.KeyChar != ',')
+            {
+                e.Handled = true; // Memblokir huruf
+            }
+
+            // Mencegah pengetikan lebih dari satu koma atau titik
+            TextBox txt = sender as TextBox;
+            if (txt != null && (e.KeyChar == '.' || e.KeyChar == ',') && (txt.Text.Contains(".") || txt.Text.Contains(",")))
+            {
+                e.Handled = true;
+            }
         }
 
         // Validasi saat tombol Simpan/Update ditekan

@@ -345,6 +345,7 @@ namespace PosyanduProject
             catch (Exception ex) { MessageBox.Show("Gagal menghapus data: " + ex.Message); }
         }
 
+
         private void btnCari_Click(object sender, EventArgs e)
         {
             try
