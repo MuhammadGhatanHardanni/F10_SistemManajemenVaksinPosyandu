@@ -519,5 +519,21 @@ namespace PosyanduProject
                 }
             }
         }
+
+        private void btnCetakKIA_Click(object sender, EventArgs e)
+        {
+            if (dgvBalita.CurrentRow != null)
+            {
+                // Ambil NIK dari kolom tabel (sesuaikan nama kolom "NIK" dengan grid Anda)
+                string nikTerpilih = dgvBalita.CurrentRow.Cells["NIK"].Value.ToString();
+
+                FormCetakKIA formKIA = new FormCetakKIA(nikTerpilih);
+                formKIA.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("Silakan pilih data anak terlebih dahulu di tabel!");
+            }
+        }
     }
 }
