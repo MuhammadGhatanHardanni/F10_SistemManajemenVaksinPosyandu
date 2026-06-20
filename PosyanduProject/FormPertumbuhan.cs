@@ -96,7 +96,13 @@ namespace PosyanduProject
 
                         bindingSource.DataSource = dtPertumbuhan;
 
-                        if (dgvPertumbuhan != null) dgvPertumbuhan.DataSource = bindingSource;
+                        if (dgvPertumbuhan != null)
+                        {
+                            dgvPertumbuhan.DataSource = bindingSource;
+                            if (dgvPertumbuhan.Columns.Contains("Berat (kg)")) dgvPertumbuhan.Columns["Berat (kg)"].DefaultCellStyle.Format = "0.##";
+                            if (dgvPertumbuhan.Columns.Contains("Tinggi (cm)")) dgvPertumbuhan.Columns["Tinggi (cm)"].DefaultCellStyle.Format = "0.##";
+                            if (dgvPertumbuhan.Columns.Contains("Lingkar Kepala")) dgvPertumbuhan.Columns["Lingkar Kepala"].DefaultCellStyle.Format = "0.##";
+                        }
 
                         if (bindingNavigator1 != null) bindingNavigator1.BindingSource = bindingSource;
                     }
@@ -114,9 +120,9 @@ namespace PosyanduProject
         private void BindControls()
         {
             if (txtIdPertumbuhan != null) { txtIdPertumbuhan.DataBindings.Clear(); txtIdPertumbuhan.DataBindings.Add("Text", bindingSource, "ID"); }
-            if (txtBerat != null) { txtBerat.DataBindings.Clear(); txtBerat.DataBindings.Add("Text", bindingSource, "Berat (kg)"); }
-            if (txtTinggi != null) { txtTinggi.DataBindings.Clear(); txtTinggi.DataBindings.Add("Text", bindingSource, "Tinggi (cm)"); }
-            if (txtLingkarKepala != null) { txtLingkarKepala.DataBindings.Clear(); txtLingkarKepala.DataBindings.Add("Text", bindingSource, "Lingkar Kepala"); }
+            if (txtBerat != null) { txtBerat.DataBindings.Clear(); txtBerat.DataBindings.Add("Text", bindingSource, "Berat (kg)", true, DataSourceUpdateMode.OnValidation, "", "0.##"); }
+            if (txtTinggi != null) { txtTinggi.DataBindings.Clear(); txtTinggi.DataBindings.Add("Text", bindingSource, "Tinggi (cm)", true, DataSourceUpdateMode.OnValidation, "", "0.##"); }
+            if (txtLingkarKepala != null) { txtLingkarKepala.DataBindings.Clear(); txtLingkarKepala.DataBindings.Add("Text", bindingSource, "Lingkar Kepala", true, DataSourceUpdateMode.OnValidation, "", "0.##"); }
             if (txtCatatan != null) { txtCatatan.DataBindings.Clear(); txtCatatan.DataBindings.Add("Text", bindingSource, "Catatan"); }
         }
 
@@ -321,13 +327,36 @@ namespace PosyanduProject
             if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && e.KeyChar != '.' && e.KeyChar != ',')
             {
                 e.Handled = true; // Memblokir huruf
+                return;
             }
 
-            // Mencegah pengetikan lebih dari satu koma atau titik
             TextBox txt = sender as TextBox;
-            if (txt != null && (e.KeyChar == '.' || e.KeyChar == ',') && (txt.Text.Contains(".") || txt.Text.Contains(",")))
+            if (txt != null)
             {
-                e.Handled = true;
+                // Mencegah pengetikan lebih dari satu koma atau titik
+                if ((e.KeyChar == '.' || e.KeyChar == ',') && (txt.Text.Contains(".") || txt.Text.Contains(",")))
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                // Membatasi hanya satu angka di belakang koma
+                if (char.IsDigit(e.KeyChar))
+                {
+                    int separatorIndex = txt.Text.IndexOfAny(new char[] { '.', ',' });
+                    
+                    // Jika ada pemisah desimal dan kursor berada di sebelah kanannya
+                    if (separatorIndex != -1 && txt.SelectionStart > separatorIndex)
+                    {
+                        int decimalLength = txt.Text.Length - separatorIndex - 1;
+                        
+                        // Jika digit desimal sudah mencapai 1 dan tidak ada teks yang diblok/di-select
+                        if (decimalLength >= 1 && txt.SelectionLength == 0)
+                        {
+                            e.Handled = true;
+                        }
+                    }
+                }
             }
         }
 
