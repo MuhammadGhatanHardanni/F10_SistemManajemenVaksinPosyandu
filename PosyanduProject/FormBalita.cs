@@ -4,8 +4,8 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.IO; // [TAMBAHAN] Wajib untuk membaca file
-using ExcelDataReader; // [TAMBAHAN] Library untuk membaca Excel
+using System.IO; 
+using ExcelDataReader; 
 
 namespace PosyanduProject
 {
@@ -42,7 +42,6 @@ namespace PosyanduProject
                 bindingNavigator1.BindingSource = bindingSource;
             }
 
-            // Mendaftarkan event CurrentChanged agar sinkron saat tombol Navigator ditekan
             bindingSource.CurrentChanged += bindingSource_CurrentChanged;
 
             LoadDataOrangTua();
@@ -50,23 +49,19 @@ namespace PosyanduProject
             BindControls();
         }
 
-        // Fungsi sinkronisasi ID saat Navigator digeser
         private void bindingSource_CurrentChanged(object sender, EventArgs e)
         {
             try
             {
                 if (bindingSource.Current == null) return;
 
-                // Mengambil data baris yang sedang aktif dipilih oleh Navigator
                 DataRowView rowView = (DataRowView)bindingSource.Current;
 
-                // Memastikan TextBox ID terisi otomatis mengikuti Navigator
                 if (txtIdBalita != null && rowView["ID"] != DBNull.Value)
                 {
                     txtIdBalita.Text = rowView["ID"].ToString();
                 }
 
-                // Sinkronisasi pilihan ComboBox Jenis Kelamin saat data bergeser
                 if (cmbJenisKelamin != null && rowView["L/P"] != DBNull.Value)
                 {
                     string jenisKelamin = rowView["L/P"].ToString();
@@ -76,7 +71,6 @@ namespace PosyanduProject
             }
             catch (Exception ex)
             {
-                // Antisipasi error logis ringan saat data sedang di-load ulang
                 System.Diagnostics.Debug.WriteLine("Navigator Sync Info: " + ex.Message);
             }
         }
@@ -98,7 +92,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Gagal memuat data Orang Tua: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormBalita (Load Data Ortu): " + ex.Message);
             }
         }
@@ -127,7 +120,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Gagal memuat data: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormBalita (Load Data Utama): " + ex.Message);
             }
         }
@@ -194,7 +186,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Gagal menghitung total: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormBalita (Hitung Total): " + ex.Message);
             }
         }
@@ -231,7 +222,6 @@ namespace PosyanduProject
                 if (ex.Number == 2627) MessageBox.Show("NIK sudah terdaftar!", "Duplikasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 else MessageBox.Show("Error Database: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormBalita (Tambah): " + ex.Message);
             }
         }
@@ -268,7 +258,6 @@ namespace PosyanduProject
                 if (ex.Number == 2627) MessageBox.Show("NIK sudah digunakan balita lain!", "Duplikasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 else MessageBox.Show("Error Database: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormBalita (Update): " + ex.Message);
             }
         }
@@ -300,7 +289,6 @@ namespace PosyanduProject
                 if (ex.Number == 547) MessageBox.Show("Akses Ditolak: Balita memiliki riwayat imunisasi/pertumbuhan.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 else MessageBox.Show("Error: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormBalita (Hapus): " + ex.Message);
             }
         }
@@ -330,7 +318,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Gagal mencari data: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormBalita (Cari): " + ex.Message);
             }
         }
@@ -448,10 +435,6 @@ namespace PosyanduProject
                 e.Handled = true;
         }
 
-        // ====================================================================
-        // [FITUR UCP 3] MENGIMPORT DATA DARI EXCEL LALU DISIMPAN KE DATABASE
-        // Sesuai Modul 14
-        // ====================================================================
         private void btnImportExcel_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog ofd = new OpenFileDialog() { Filter = "Excel Workbook|*.xlsx;*.xls", Title = "Pilih File Excel Data Balita" })
@@ -460,7 +443,6 @@ namespace PosyanduProject
                 {
                     try
                     {
-                        // 1. Membaca file Excel yang dipilih [Sesuai Modul 14]
                         using (var stream = File.Open(ofd.FileName, FileMode.Open, FileAccess.Read))
                         using (var reader = ExcelReaderFactory.CreateReader(stream))
                         {
@@ -473,7 +455,6 @@ namespace PosyanduProject
                             int sukses = 0;
                             int gagal = 0;
 
-                            // 2. Melakukan looping untuk menyimpan setiap baris dari Excel ke Database
                             foreach (DataRow row in dtExcel.Rows)
                             {
                                 try

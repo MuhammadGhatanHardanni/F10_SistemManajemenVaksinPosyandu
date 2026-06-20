@@ -164,7 +164,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Gagal menghitung total: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormJadwal (Hitung Total): " + ex.Message);
             }
         }
@@ -214,7 +213,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Error: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormJadwal (Tambah): " + ex.Message);
             }
         }
@@ -262,7 +260,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Error: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormJadwal (Update): " + ex.Message);
             }
         }
@@ -294,7 +291,6 @@ namespace PosyanduProject
                 if (ex.Number == 547) MessageBox.Show("Akses Ditolak: Jadwal sudah dipakai dalam transaksi imunisasi, tidak bisa dihapus.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 else MessageBox.Show("Error Database: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormJadwal (Hapus): " + ex.Message);
             }
         }
@@ -323,7 +319,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Gagal mencari data: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormJadwal (Cari): " + ex.Message);
             }
         }
@@ -335,7 +330,7 @@ namespace PosyanduProject
 
         private void dgvJadwal_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            // Dikosongkan karena sinkronisasi sudah ditangani oleh bindingSource_CurrentChanged
+
         }
 
         private bool Validasi()

@@ -4,8 +4,8 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.IO; // [TAMBAHAN] Wajib untuk membaca file Excel
-using ExcelDataReader; // [TAMBAHAN] Library pembaca Excel
+using System.IO; 
+using ExcelDataReader; 
 
 namespace PosyanduProject
 {
@@ -72,7 +72,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Gagal memuat data: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormVaksin (Load Data): " + ex.Message);
             }
         }
@@ -156,7 +155,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Gagal menghitung total: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormVaksin (Hitung Total): " + ex.Message);
             }
         }
@@ -190,7 +188,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Error: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormVaksin (Tambah): " + ex.Message);
             }
         }
@@ -229,7 +226,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Error: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormVaksin (Update): " + ex.Message);
             }
         }
@@ -261,7 +257,6 @@ namespace PosyanduProject
                 if (ex.Number == 547) MessageBox.Show("Vaksin sedang digunakan di data imunisasi, tidak bisa dihapus!", "Akses Ditolak", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 else MessageBox.Show("Error: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormVaksin (Hapus): " + ex.Message);
             }
         }
@@ -291,7 +286,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Gagal mencari data: " + ex.Message);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormVaksin (Cari): " + ex.Message);
             }
         }
@@ -391,7 +385,7 @@ namespace PosyanduProject
         }
 
         // ====================================================================
-        // [FITUR UCP 3] MENGIMPORT DATA DARI EXCEL LALU DISIMPAN KE DATABASE
+        // MENGIMPORT DATA DARI EXCEL LALU DISIMPAN KE DATABASE
         // ====================================================================
         private void btnImportExcel_Click(object sender, EventArgs e)
         {

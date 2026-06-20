@@ -86,7 +86,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Terjadi kesalahan sistem: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormRegister (Proses Daftar): " + ex.Message);
             }
         }

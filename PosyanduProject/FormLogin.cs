@@ -36,7 +36,6 @@ namespace PosyanduProject
 
             try
             {
-                // [UCP 3] Menggunakan Parameterized Query untuk mencegah SQL Injection
                 string sql = "SELECT id_user, nama_lengkap, username, role FROM Users WHERE username = @user AND password = @pass";
 
                 DataTable dt = DatabaseHelper.GetDataTable(sql,
@@ -65,7 +64,6 @@ namespace PosyanduProject
                     txtPassword.Clear();
                     txtPassword.Focus();
 
-                    // [TAMBAHAN UCP 3] Log kegagalan login
                     DatabaseHelper.CatatLogError("Login Gagal: Username atau Password salah untuk user: " + txtUsername.Text);
                 }
             }
@@ -73,7 +71,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Error koneksi database:\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormLogin (Koneksi Database): " + ex.Message);
             }
         }

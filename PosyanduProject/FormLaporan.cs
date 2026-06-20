@@ -3,8 +3,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting; // [TAMBAHAN UCP 3] Library wajib untuk Grafik
-
+using System.Windows.Forms.DataVisualization.Charting; 
 namespace PosyanduProject
 {
     public partial class FormLaporan : Form
@@ -88,7 +87,7 @@ namespace PosyanduProject
         }
 
         // ==============================================================
-        // SYARAT UJIAN 1: PENGGUNAAN VIEW (Untuk Kueri Tampil Data)
+        // PENGGUNAAN VIEW (Untuk Kueri Tampil Data)
         // ==============================================================
         private void LoadLaporanStok()
         {
@@ -123,7 +122,6 @@ namespace PosyanduProject
                 if (lblStatusLaporan != null)
                     lblStatusLaporan.Text = $"Mode: Rekap Stok | Total Jenis Vaksin: {dtLaporan.Rows.Count}";
 
-                // [FITUR UCP 3] Panggil fungsi render grafik setelah data tabel dimuat
                 LoadGrafikVaksin();
 
                 // Pastikan grafik terlihat
@@ -133,13 +131,12 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Gagal memuat laporan stok: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormLaporan (Load Laporan Stok): " + ex.Message);
             }
         }
 
         // ==============================================================
-        // [FITUR UCP 3] DASHBOARD GRAFIK KETERSEDIAAN STOK VAKSIN
+        // DASHBOARD GRAFIK KETERSEDIAAN STOK VAKSIN
         // ==============================================================
         private void LoadGrafikVaksin()
         {
@@ -184,7 +181,7 @@ namespace PosyanduProject
         }
 
         // ==============================================================
-        // SYARAT UJIAN 2: PENGGUNAAN STORED PROCEDURE (Untuk Pemfilteran)
+        // PENGGUNAAN STORED PROCEDURE (Untuk Pemfilteran)
         // ==============================================================
         private void LoadCakupanImunisasi()
         {
@@ -271,7 +268,6 @@ namespace PosyanduProject
             {
                 MessageBox.Show("Gagal memuat riwayat: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                // [TAMBAHAN UCP 3] Log Error
                 DatabaseHelper.CatatLogError("FormLaporan (Load Riwayat Orang Tua): " + ex.Message);
             }
         }
@@ -284,7 +280,7 @@ namespace PosyanduProject
 
         private void chartVaksin_Click(object sender, EventArgs e)
         {
-            // Dibiarkan kosong agar tidak error di UI Designer
+            
         }
 
         private void btnCetak_Click(object sender, EventArgs e)
