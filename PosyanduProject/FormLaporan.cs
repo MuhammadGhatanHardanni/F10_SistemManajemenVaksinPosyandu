@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
@@ -71,6 +71,20 @@ namespace PosyanduProject
 
             // Sembunyikan grafik jika yang login orang tua (karena orang tua hanya melihat riwayat anak)
             if (chartVaksin != null) chartVaksin.Visible = false;
+
+            // Sembunyikan tombol cetak untuk orang tua
+            if (btnCetak != null) btnCetak.Visible = false;
+            if (btnCetakStok != null) btnCetakStok.Visible = false;
+
+            if (lblTitle != null) lblTitle.Text = "Riwayat Imunisasi Anak";
+            
+            // Perlebar grid karena chart disembunyikan
+            if (dgvLaporan != null) 
+            { 
+                dgvLaporan.Left = 30; 
+                dgvLaporan.Width = this.ClientSize.Width - 60;
+                dgvLaporan.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            }
         }
 
         // ==============================================================
@@ -272,5 +286,29 @@ namespace PosyanduProject
         {
             // Dibiarkan kosong agar tidak error di UI Designer
         }
+
+        private void btnCetak_Click(object sender, EventArgs e)
+        {
+            // Validasi agar memastikan ComboBox sudah dipilih
+            if (cmbBulan.SelectedIndex == -1 || cmbTahun.SelectedIndex == -1)
+            {
+                MessageBox.Show("Pilih Bulan dan Tahun terlebih dahulu!", "Peringatan", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            int bulan = cmbBulan.SelectedIndex + 1;
+            int tahun = Convert.ToInt32(cmbTahun.SelectedItem);
+
+            // Membuka Form Cetak dengan mengirim parameter bulan dan tahun (Sesuai Modul Hal. 12)
+            FormCetak formCetak = new FormCetak(bulan, tahun);
+            formCetak.ShowDialog();
+        }
+
+        private void btnCetakStok_Click(object sender, EventArgs e)
+        {
+            FormCetakStok formCetakStok = new FormCetakStok();
+            formCetakStok.ShowDialog();
+        }
+
     }
 }
