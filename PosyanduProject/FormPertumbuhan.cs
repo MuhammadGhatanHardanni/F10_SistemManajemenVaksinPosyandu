@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
@@ -71,6 +71,16 @@ namespace PosyanduProject
                 if (lbl5 != null) lbl5.Visible = false;
                 if (lbl6 != null) lbl6.Visible = false;
                 if (lbl7 != null) lbl7.Visible = false;
+
+                if (lblTitle != null) lblTitle.Text = "Riwayat Pertumbuhan Anak";
+                if (dgvPertumbuhan != null) { dgvPertumbuhan.Left = 30; }
+                if (txtCari != null) { txtCari.Left = 30; }
+                if (lblTotal != null) { lblTotal.Left = 30; }
+                
+                foreach (Control c in this.Controls)
+                {
+                    if (c is BindingNavigator) c.Visible = false;
+                }
             }
 
             // === PENGATURAN BINDING NAVIGATOR (Modul 8) ===
