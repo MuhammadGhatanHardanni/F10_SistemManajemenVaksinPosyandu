@@ -1,3 +1,13 @@
 <Solution>
-  <Project Path="PosyanduProject/PosyanduProject.csproj" Id="d6b7936d-6a0a-4a96-9a1d-9d3f6d41a571" />
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="PosyanduProject/PosyanduProject.csproj" Id="d6b7936d-6a0a-4a96-9a1d-9d3f6d41a571">
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="*|x86" Project="x86" />
+    <Platform Solution="Debug|ARM64" Project="ARM64" />
+  </Project>
 </Solution>
