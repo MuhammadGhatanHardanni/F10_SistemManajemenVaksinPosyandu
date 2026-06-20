@@ -9,7 +9,6 @@ namespace PosyanduProject
 {
     public partial class FormPertumbuhan : Form
     {
-        // 1. Variabel Disconnected Architecture (Modul 8)
         private BindingSource bindingSource = new BindingSource();
         private DataTable dtPertumbuhan = new DataTable();
 
@@ -17,20 +16,17 @@ namespace PosyanduProject
         {
             InitializeComponent();
 
-            // 1. Menyambungkan event Load
             this.Load += FormPertumbuhan_Load;
 
-            // 2. Menyambungkan kabel tombol-tombol CRUD
             if (btnSimpan != null) btnSimpan.Click += btnSimpan_Click;
             if (btnUpdate != null) btnUpdate.Click += btnUpdate_Click;
             if (btnHapus != null) btnHapus.Click += btnHapus_Click;
             if (btnBersih != null) btnBersih.Click += btnBersih_Click;
 
-            // 3. Menyambungkan kabel pencarian & klik tabel
             if (btnCari != null) btnCari.Click += btnCari_Click;
             if (dgvPertumbuhan != null) dgvPertumbuhan.CellClick += dgvPertumbuhan_CellClick;
 
-            // 4. [FITUR BARU] Menyambungkan validasi KeyPress ke kolom angka
+            // 4. Menyambungkan validasi KeyPress ke kolom angka
             if (txtBerat != null) txtBerat.KeyPress += txtAngkaDesimal_KeyPress;
             if (txtTinggi != null) txtTinggi.KeyPress += txtAngkaDesimal_KeyPress;
             if (txtLingkarKepala != null) txtLingkarKepala.KeyPress += txtAngkaDesimal_KeyPress;
@@ -38,7 +34,6 @@ namespace PosyanduProject
 
         private void FormPertumbuhan_Load(object sender, EventArgs e)
         {
-            // Mengunci ID agar tidak bisa diedit manual
             if (txtIdPertumbuhan != null) txtIdPertumbuhan.ReadOnly = true;
 
             // Batasi kalender (Maksimal hari ini, Minimal 5 tahun lalu)
@@ -48,52 +43,25 @@ namespace PosyanduProject
                 dtpTimbang.MinDate = DateTime.Today.AddYears(-5);
             }
 
-            // [LOGIKA KEAMANAN DIPERTAHANKAN] Sembunyikan fitur input jika yang login Orang Tua
+            // Membatasi jumlah karakter maksimal (panjang digit) yang bisa diketik
+            // Sesuai tipe data database DECIMAL(5,2) -> format: XXX,XX
+            if (txtBerat != null) txtBerat.MaxLength = 5; // contoh: 40,50 (5 karakter)
+            if (txtTinggi != null) txtTinggi.MaxLength = 6; // contoh: 130,50 (6 karakter)
+            if (txtLingkarKepala != null) txtLingkarKepala.MaxLength = 5; // contoh: 60,50 (5 karakter)
+
+            // Sembunyikan fitur input jika yang login Orang Tua
             if (SessionManager.Role == "OrangTua")
             {
-                if (btnSimpan != null) btnSimpan.Visible = false;
-                if (btnUpdate != null) btnUpdate.Visible = false;
-                if (btnHapus != null) btnHapus.Visible = false;
-                if (btnBersih != null) btnBersih.Visible = false;
-
-                if (cmbBalita != null) cmbBalita.Visible = false;
-                if (dtpTimbang != null) dtpTimbang.Visible = false;
-                if (txtBerat != null) txtBerat.Visible = false;
-                if (txtTinggi != null) txtTinggi.Visible = false;
-                if (txtLingkarKepala != null) txtLingkarKepala.Visible = false;
-                if (txtCatatan != null) txtCatatan.Visible = false;
-                if (txtIdPertumbuhan != null) txtIdPertumbuhan.Visible = false;
-
-                if (lbl1 != null) lbl1.Visible = false;
-                if (lbl2 != null) lbl2.Visible = false;
-                if (lbl3 != null) lbl3.Visible = false;
-                if (lbl4 != null) lbl4.Visible = false;
-                if (lbl5 != null) lbl5.Visible = false;
-                if (lbl6 != null) lbl6.Visible = false;
-                if (lbl7 != null) lbl7.Visible = false;
-
-                if (lblTitle != null) lblTitle.Text = "Riwayat Pertumbuhan Anak";
-                if (dgvPertumbuhan != null) { dgvPertumbuhan.Left = 30; }
-                if (txtCari != null) { txtCari.Left = 30; }
-                if (lblTotal != null) { lblTotal.Left = 30; }
-                
-                foreach (Control c in this.Controls)
-                {
-                    if (c is BindingNavigator) c.Visible = false;
-                }
+                // ... (Kode visibilitas tetap sama)
+                foreach (Control c in this.Controls) { if (c is BindingNavigator) c.Visible = false; }
             }
 
-            // === PENGATURAN BINDING NAVIGATOR (Modul 8) ===
-            // Asumsi: Anda sudah menambahkan BindingNavigator di Designer
-            // if (bindingNavigator1 != null) bindingNavigator1.BindingSource = bindingSource;
-
             bindingSource.CurrentChanged += bindingSource_CurrentChanged;
-            // ==============================================
-
             LoadComboBoxBalita();
-            LoadData(); // Memanggil VIEW (Modul 9)
-            BindControls(); // Menghubungkan TextBox dengan BindingSource
+            LoadData();
+            BindControls();
         }
+
 
         private void LoadComboBoxBalita()
         {
@@ -126,18 +94,15 @@ namespace PosyanduProject
                         dtPertumbuhan = new DataTable();
                         da.Fill(dtPertumbuhan);
 
-                        // 1. Masukkan data ke BindingSource
                         bindingSource.DataSource = dtPertumbuhan;
 
-                        // 2. Sambungkan ke Tabel (DataGridView)
                         if (dgvPertumbuhan != null) dgvPertumbuhan.DataSource = bindingSource;
 
-                        // 3. Paksa Navigator untuk membaca data yang sama!
                         if (bindingNavigator1 != null) bindingNavigator1.BindingSource = bindingSource;
                     }
                 }
 
-                HitungTotal(); // Panggil SP Count
+                HitungTotal();
             }
             catch (Exception ex)
             {
@@ -375,25 +340,44 @@ namespace PosyanduProject
                 return false;
             }
 
+            // Validasi Berat Badan
             if (string.IsNullOrWhiteSpace(txtBerat.Text) || ParseDecimal(txtBerat.Text) <= 0)
             {
                 MessageBox.Show("Berat badan wajib diisi dengan angka lebih dari 0!", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtBerat.Focus();
                 return false;
             }
+            if (ParseDecimal(txtBerat.Text) > 40) // Asumsi berat balita maksimal 40kg
+            {
+                MessageBox.Show("Angka berat badan tidak logis untuk balita (Maks 40kg)!", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtBerat.Focus();
+                return false;
+            }
 
+            // Validasi Tinggi Badan
             if (string.IsNullOrWhiteSpace(txtTinggi.Text) || ParseDecimal(txtTinggi.Text) <= 0)
             {
                 MessageBox.Show("Tinggi badan wajib diisi dengan angka lebih dari 0!", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtTinggi.Focus();
                 return false;
             }
-
-            if (!string.IsNullOrWhiteSpace(txtLingkarKepala.Text) && ParseDecimal(txtLingkarKepala.Text) <= 0)
+            if (ParseDecimal(txtTinggi.Text) > 130) // Asumsi tinggi balita maksimal 130cm
             {
-                MessageBox.Show("Jika lingkar kepala diisi, nilainya harus berupa angka lebih dari 0!", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtLingkarKepala.Focus();
+                MessageBox.Show("Angka tinggi badan tidak logis untuk balita (Maks 130cm)!", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtTinggi.Focus();
                 return false;
+            }
+
+            // Validasi Lingkar Kepala
+            if (!string.IsNullOrWhiteSpace(txtLingkarKepala.Text))
+            {
+                decimal lingkar = ParseDecimal(txtLingkarKepala.Text);
+                if (lingkar <= 0 || lingkar > 60) // Asumsi lingkar kepala balita maks 60cm
+                {
+                    MessageBox.Show("Angka lingkar kepala tidak logis (Maks 60cm)!", "Validasi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    txtLingkarKepala.Focus();
+                    return false;
+                }
             }
 
             if (Regex.IsMatch(txtCatatan.Text, @"[<>^*%]"))

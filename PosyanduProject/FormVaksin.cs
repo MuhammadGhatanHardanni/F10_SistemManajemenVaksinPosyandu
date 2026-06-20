@@ -28,7 +28,11 @@ namespace PosyanduProject
 
             if (dtpKedaluwarsa != null)
             {
+                // Membatasi pilihan maksimal hingga 10 tahun ke depan
                 dtpKedaluwarsa.MaxDate = DateTime.Today.AddYears(10);
+
+                // [PERBAIKAN] Membatasi pilihan minimal adalah HARI INI
+                dtpKedaluwarsa.MinDate = DateTime.Today;
             }
 
             // BINDING NAVIGATOR

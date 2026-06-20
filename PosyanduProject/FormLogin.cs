@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Windows.Forms;
@@ -18,6 +18,10 @@ namespace PosyanduProject
             {
                 txtPassword.UseSystemPasswordChar = true;
             }
+
+            // [UPDATE] Membatasi input agar sesuai dengan database
+            if (txtUsername != null) txtUsername.MaxLength = 50;
+            if (txtPassword != null) txtPassword.MaxLength = 255;
         }
 
         private void btnLogin_Click(object sender, EventArgs e)

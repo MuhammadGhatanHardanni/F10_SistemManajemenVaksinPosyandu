@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Windows.Forms;
@@ -18,6 +18,12 @@ namespace PosyanduProject
             // [UX] Memastikan kolom password disamarkan saat form pertama kali dimuat
             if (txtPassword != null) txtPassword.UseSystemPasswordChar = true;
             if (txtKonfirmasi != null) txtKonfirmasi.UseSystemPasswordChar = true;
+
+            // [UPDATE] Membatasi input agar tidak error karena kepanjangan di Database
+            if (txtNama != null) txtNama.MaxLength = 100;
+            if (txtUsername != null) txtUsername.MaxLength = 50;
+            if (txtPassword != null) txtPassword.MaxLength = 255;
+            if (txtKonfirmasi != null) txtKonfirmasi.MaxLength = 255;
         }
 
         private void btnDaftar_Click(object sender, EventArgs e)
