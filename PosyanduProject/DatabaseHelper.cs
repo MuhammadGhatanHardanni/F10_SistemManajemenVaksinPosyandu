@@ -7,16 +7,14 @@ namespace PosyanduProject
     public static class DatabaseHelper
     {
 
-        // 1. Connection String Lokal (Dipakai saat di laptop Anda sendiri)
         private const string _connectionString =
-            @"Server=LAPTOP-VL5SDNPR\GHATANHARDANNI;Database=SistemManajemenPosyandu;Integrated Security=True;";
+            @"Data Source=10.207.89.253\GHATANHARDANNI;Initial Catalog=SistemManajemenPosyandu;User ID=sa;Password=12345678;";
 
         public static SqlConnection GetConnection()
         {
             return new SqlConnection(_connectionString);
         }
 
-        // Fungsi ini dibutuhkan oleh form-form yang menggunakan Disconnected Architecture (DataAdapter)
         public static string GetConnectionString()
         {
             return _connectionString;
@@ -40,7 +38,6 @@ namespace PosyanduProject
             catch (SqlException ex)
             {
                 pesan = $"SQL Error ({ex.Number}): {ex.Message}";
-                // [BARU] Catat error ke database jika gagal tes koneksi (opsional)
                 CatatLogError($"Tes Koneksi Gagal: {ex.Message}");
                 return false;
             }
@@ -94,6 +91,7 @@ namespace PosyanduProject
             }
             return dt;
         }
+
         public static void CatatLogError(string pesanError)
         {
             try
@@ -103,7 +101,6 @@ namespace PosyanduProject
                     string query = "INSERT INTO LogError (waktu, pesan_error) VALUES (GETDATE(), @pesan)";
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
-                        // Memasukkan pesan error dari try-catch ke dalam tabel LogError
                         cmd.Parameters.AddWithValue("@pesan", pesanError);
                         conn.Open();
                         cmd.ExecuteNonQuery();
@@ -112,9 +109,7 @@ namespace PosyanduProject
             }
             catch
             {
-                // Blok catch ini sengaja DIBIARKAN KOSONG.
-                // Tujuannya: Jika fungsi pencatat Log ini sendiri yang gagal (misal koneksi terputus total), 
-                // aplikasi tidak akan ikut nge-crash / freeze.
+
             }
         }
     }
