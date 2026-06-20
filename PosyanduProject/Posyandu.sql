@@ -1,4 +1,4 @@
-﻿-- SISTEM MANAJEMEN VAKSIN POSYANDU
+-- SISTEM MANAJEMEN VAKSIN POSYANDU
 CREATE DATABASE SistemManajemenPosyandu;
 GO
 
@@ -25,6 +25,8 @@ CREATE TABLE Balita (
     nama_ortu       VARCHAR(100) NOT NULL
 );
 GO
+
+SELECT * FROM Balita;
 
 CREATE TABLE Vaksin (
     id_vaksin       INT PRIMARY KEY IDENTITY(1,1),
@@ -566,3 +568,170 @@ BEGIN
         SELECT 1 AS Result;
     END
 END
+
+
+-- T-SQL dan Trigger.
+
+CREATE TABLE LogAktivitasPosyandu (
+    id_log INT IDENTITY(1,1) PRIMARY KEY,
+    aktivitas VARCHAR(255),
+    waktu DATETIME
+);
+
+SELECT * FROM LogAktivitasPosyandu;
+
+CREATE TRIGGER trg_TambahBalita
+ON Balita
+AFTER INSERT
+AS
+BEGIN
+    -- [T-SQL] Menangkap nama balita dari tabel virtual 'inserted'
+    DECLARE @nama_anak VARCHAR(100);
+    SELECT @nama_anak = nama_balita FROM inserted;
+
+    -- [T-SQL] Insert otomatis ke tabel Log (2).pdf]
+    INSERT INTO LogAktivitasPosyandu (aktivitas, waktu)
+    VALUES ('[INFO] Data balita baru ditambahkan: ' + @nama_anak, GETDATE());
+END;
+
+CREATE TRIGGER trg_HapusBalita
+ON Balita
+AFTER DELETE
+AS
+BEGIN
+    -- [T-SQL] Deklarasi variabel untuk menangkap nama balita yang dihapus
+    DECLARE @nama_anak VARCHAR(100);
+    SELECT @nama_anak = nama_balita FROM deleted;
+
+    -- [T-SQL] Insert otomatis ke tabel Log
+    INSERT INTO LogAktivitasPosyandu (aktivitas, waktu)
+    VALUES ('[WARNING] Data balita dihapus: ' + @nama_anak, GETDATE());
+END;
+
+CREATE TRIGGER trg_UbahBalita
+ON Balita
+AFTER UPDATE
+AS
+BEGIN
+    -- [T-SQL] Menangkap nama balita dari tabel virtual 'inserted' (data yang sudah diperbarui)
+    DECLARE @nama_anak VARCHAR(100);
+    SELECT @nama_anak = nama_balita FROM inserted;
+
+    -- [T-SQL] Insert otomatis ke tabel Log
+    INSERT INTO LogAktivitasPosyandu (aktivitas, waktu)
+    VALUES ('[INFO] Data balita diubah/diupdate: ' + @nama_anak, GETDATE());
+END;
+
+CREATE TABLE LogError (
+    id_log INT IDENTITY(1,1) PRIMARY KEY,
+    waktu DATETIME,
+    pesan_error VARCHAR(MAX)
+);
+
+SELECT * FROM LogError;
+
+USE SistemManajemenPosyandu;
+GO
+
+-- 1. Trigger Reset ID untuk tabel Balita
+CREATE TRIGGER trg_ResetIdBalita
+ON Balita
+AFTER DELETE
+AS
+BEGIN
+    DECLARE @maxID INT;
+    SELECT @maxID = ISNULL(MAX(id_balita), 0) FROM Balita;
+    DBCC CHECKIDENT ('Balita', RESEED, @maxID);
+END;
+GO
+
+-- 2. Trigger Reset ID untuk tabel Vaksin
+CREATE TRIGGER trg_ResetIdVaksin
+ON Vaksin
+AFTER DELETE
+AS
+BEGIN
+    DECLARE @maxID INT;
+    SELECT @maxID = ISNULL(MAX(id_vaksin), 0) FROM Vaksin;
+    DBCC CHECKIDENT ('Vaksin', RESEED, @maxID);
+END;
+GO
+
+-- 3. Trigger Reset ID untuk tabel Jadwal
+CREATE TRIGGER trg_ResetIdJadwal
+ON Jadwal_Posyandu
+AFTER DELETE
+AS
+BEGIN
+    DECLARE @maxID INT;
+    SELECT @maxID = ISNULL(MAX(id_jadwal), 0) FROM Jadwal_Posyandu;
+    DBCC CHECKIDENT ('Jadwal_Posyandu', RESEED, @maxID);
+END;
+GO
+
+-- 4. Trigger Reset ID untuk tabel Transaksi Imunisasi
+CREATE TRIGGER trg_ResetIdImunisasi
+ON Transaksi_Imunisasi
+AFTER DELETE
+AS
+BEGIN
+    DECLARE @maxID INT;
+    SELECT @maxID = ISNULL(MAX(id_imunisasi), 0) FROM Transaksi_Imunisasi;
+    DBCC CHECKIDENT ('Transaksi_Imunisasi', RESEED, @maxID);
+END;
+GO
+
+-- 5. Trigger Reset ID untuk tabel Pertumbuhan
+CREATE TRIGGER trg_ResetIdPertumbuhan
+ON Catatan_Pertumbuhan
+AFTER DELETE
+AS
+BEGIN
+    DECLARE @maxID INT;
+    SELECT @maxID = ISNULL(MAX(id_pertumbuhan), 0) FROM Catatan_Pertumbuhan;
+    DBCC CHECKIDENT ('Catatan_Pertumbuhan', RESEED, @maxID);
+END;
+GO
+
+CREATE PROCEDURE sp_CetakBukuKIA
+    @NIK_Anak VARCHAR(16)
+AS
+BEGIN
+    SELECT 
+        b.NIK, 
+        b.Nama AS Nama_Anak, 
+        b.Nama_Ibu, 
+        CONVERT(VARCHAR, b.Tanggal_Lahir, 106) AS Tanggal_Lahir,
+        CONVERT(VARCHAR, t.Tanggal_Imunisasi, 106) AS Tanggal_Suntik,
+        v.Nama_Vaksin,
+        p.Berat_Badan + ' kg' AS Berat_Badan,
+        p.Tinggi_Badan + ' cm' AS Tinggi_Badan,
+        t.Nama_Petugas
+    FROM Balita b
+    LEFT JOIN Transaksi t ON b.ID_Balita = t.ID_Balita
+    LEFT JOIN Vaksin v ON t.ID_Vaksin = v.ID_Vaksin
+    LEFT JOIN Pertumbuhan p ON b.ID_Balita = p.ID_Balita AND t.Bulan = p.Bulan AND t.Tahun = p.Tahun
+    WHERE b.NIK = @NIK_Anak
+END
+GO
+
+CREATE PROCEDURE sp_CetakLembarKerja
+    @id_jadwal INT
+AS
+BEGIN
+    SELECT 
+        CONVERT(VARCHAR, j.tgl_pelaksanaan, 106) AS Tanggal_Pelaksanaan,
+        j.lokasi AS Lokasi,
+        j.keterangan AS Keterangan,
+        ti.no_antrean AS No_Antrean,
+        b.nama_balita AS Nama_Balita,
+        v.nama_vaksin AS Nama_Vaksin,
+        ti.status AS Status
+    FROM Jadwal_Posyandu j
+    LEFT JOIN Transaksi_Imunisasi ti ON j.id_jadwal = ti.id_jadwal
+    LEFT JOIN Balita b ON ti.id_balita = b.id_balita
+    LEFT JOIN Vaksin v ON ti.id_vaksin = v.id_vaksin
+    WHERE j.id_jadwal = @id_jadwal
+    ORDER BY ti.no_antrean ASC;
+END
+GO
