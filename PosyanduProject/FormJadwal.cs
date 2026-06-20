@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
@@ -35,6 +35,7 @@ namespace PosyanduProject
                 if (btnUpdate != null) btnUpdate.Visible = false;
                 if (btnHapus != null) btnHapus.Visible = false;
                 if (btnBersih != null) btnBersih.Visible = false;
+                if (btnCetakLembar != null) btnCetakLembar.Visible = false;
 
                 if (dtpPelaksanaan != null) dtpPelaksanaan.Visible = false;
                 if (txtLokasi != null) txtLokasi.Visible = false;
@@ -45,6 +46,14 @@ namespace PosyanduProject
                 if (label2 != null) label2.Visible = false;
                 if (label3 != null) label3.Visible = false;
                 if (label4 != null) label4.Visible = false;
+
+                if (lblTitle != null) lblTitle.Text = "Jadwal Posyandu";
+                if (dgvJadwal != null) { dgvJadwal.Left = 30; }
+                if (txtCari != null) { txtCari.Left = 30; }
+                if (lblTotal != null) { lblTotal.Left = 30; }
+                
+                // Hide Binding Navigator for Orang Tua since they don't add/delete
+                if (bindingNavigator1 != null) bindingNavigator1.Visible = false;
             }
 
             if (bindingNavigator1 != null)
@@ -357,6 +366,23 @@ namespace PosyanduProject
             if (txtCari != null) txtCari.Clear();
 
             if (dtpPelaksanaan != null) dtpPelaksanaan.Value = DateTime.Today;
+        }
+
+        private void btnCetakLembar_Click(object sender, EventArgs e)
+        {
+            // Pastikan ada baris jadwal yang dipilih di DataGridView
+            if (dgvJadwal.CurrentRow != null)
+            {
+                // Asumsi kolom pertama di dgvJadwal adalah "ID" (id_jadwal)
+                int idJadwal = Convert.ToInt32(dgvJadwal.CurrentRow.Cells["ID"].Value);
+
+                FormCetakLembar formCetak = new FormCetakLembar(idJadwal);
+                formCetak.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("Silakan pilih salah satu jadwal terlebih dahulu dari tabel!");
+            }
         }
     }
 }
