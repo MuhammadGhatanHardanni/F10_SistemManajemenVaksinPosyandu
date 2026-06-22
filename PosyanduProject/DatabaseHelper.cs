@@ -8,7 +8,7 @@ namespace PosyanduProject
     {
 
         private const string _connectionString =
-            @"Data Source=10.207.89.253\GHATANHARDANNI;Initial Catalog=SistemManajemenPosyandu;User ID=sa;Password=12345678;";
+            @"Data Source=LAPTOP-VL5SDNPR\GHATANHARDANNI;Initial Catalog=SistemManajemenPosyandu;User ID=sa;Password=12345678;";
 
         public static SqlConnection GetConnection()
         {
